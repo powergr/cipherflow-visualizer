@@ -1,47 +1,66 @@
-# Astro Starter Kit: Minimal
+# CipherFlow 🔑
 
-```sh
-npm create astro@latest -- --template minimal
-```
+CipherFlow is an interactive web-based tool designed to help students, developers, and the curious understand how modern encryption algorithms work through clear, step-by-step visualizations. Instead of just reading theory, you can see the data transformation process in action.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/minimal)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/minimal)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/minimal/devcontainer.json)
+> **Note:** This project is currently a work in progress. The core visualizer is functional, but blog pages and additional content are actively being developed.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+![CipherFlow AES Visualizer](./public/images/hero-visualizer.jpg)
 
-## 🚀 Project Structure
+## ✨ Features
 
-Inside of your Astro project, you'll see the following folders and files:
+***Step-by-Step Visualization:** Watch algorithms like AES transform data in real-time. Follow every substitution, permutation, and key mix to truly understand the process, not just the theory.
+***Interactive Controls:** Input your own custom data and keys. Pause, rewind, and inspect the state at any stage to see instantly how changing a single bit can affect the entire outcome.
+***In-Depth Explanations:** Each visual step is paired with clear, concise explanations. Understand the "why" behind the math, not just the "how," with insights linked directly to the on-screen action.
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+## 🛠️ Tech Stack
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+***Framework:** [Astro](https://astro.build/) - For a fast, content-focused frontend.
+***Styling:** [Tailwind CSS](https://tailwindcss.com/) - For modern, utility-first styling.
+***Visualizations:** [D3.js](https://d3js.org/) - For dynamic and data-driven visualizations.
+***Deployment:** Ready for deployment on platforms like Netlify, Vercel, or GitHub Pages.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## 🚀 Getting Started
 
-Any static assets, like images, can be placed in the `public/` directory.
+To get a local copy up and running, follow these simple steps.
 
-## 🧞 Commands
+### Prerequisites
 
-All commands are run from the root of the project, from a terminal:
+* Node.js (version 18.x or later)
+* npm or pnpm or yarn
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+### Installation & Setup
 
-## 👀 Want to learn more?
+1. Clone the repository:
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+    ```bash
+    git clone https://github.com/your-username/cipherflow-visualizer.git
+    ```
+
+2. Navigate to the project directory:
+
+  ```bash
+    cd cipherflow-visualizer
+    ```
+3. Install the dependencies:
+    
+    ```bash
+    npm install
+    ```
+
+### Running the Project
+
+To start the local development server, run:
+
+```bash
+npm run dev
+ ```
+
+Open your browser and navigate to `http://localhost:4321` to see the application.
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/powergr/cipherflow-visualizer/issues).
+
+## 📄 License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
