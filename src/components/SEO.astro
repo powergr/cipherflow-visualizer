@@ -1,4 +1,11 @@
 ---
+
+import faviconIco from '/public/favicon.ico';
+import favicon16 from '/public/favicon-16x16.png';
+import favicon32 from '/public/favicon-32x32.png';
+import appleIcon from '/public/apple-touch-icon.png';
+import manifest from '/public/site.webmanifest';
+
 export interface Props {
   title: string;
   description: string;
@@ -140,13 +147,13 @@ const jsonLD = {
 <meta name="msapplication-TileColor" content="#3b82f6" />
 
 <!-- Apple Touch Icon -->
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+<link rel="apple-touch-icon" sizes="180x180" href={appleIcon.src} />
 
 <!-- Favicon -->
-<link rel="icon" href="/favicon.ico" />
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-<link rel="manifest" href="/site.webmanifest" />
+<link rel="icon" href={faviconIco} /> 
+<link rel="icon" type="image/png" sizes="32x32" href={favicon32.src} />
+<link rel="icon" type="image/png" sizes="16x16" href={favicon16.src} /> 
+<link rel="manifest" href={manifest} /> 
 
 <!-- RSS Feed -->
 <link rel="alternate" type="application/rss+xml" title={`${siteName} RSS Feed`} href="/rss.xml" />
