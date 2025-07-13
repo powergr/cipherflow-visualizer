@@ -1,5 +1,6 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
+import logo from '/public/images/logo.png';
 
 // Get current path for active navigation
 const currentPath = Astro.url.pathname;
@@ -19,7 +20,7 @@ const navigationItems = [
       <div class="flex items-center">
       <a href="/" class="flex items-center space-x-3 text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
        <!-- The new image tag replaces the old SVG block -->
-       <img src="/images/logo.png" alt="CipherFlow Logo" class="w-8 h-8">
+        <img src={logo.src} alt="CipherFlow Logo" class="w-8 h-8">
   
        <span class="hidden sm:block">CipherFlow</span>
       </a>
