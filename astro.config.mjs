@@ -5,7 +5,9 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://your-educational-blog.pages.dev', // Replace with your actual domain
+  site: 'https://powergr.github.io',
+  base: '/cipherflow-visualizer',
+
   integrations: [
     tailwind(),
     mdx(),
