@@ -1,0 +1,266 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+
+// Get current path for active navigation
+const currentPath = Astro.url.pathname;
+
+// Navigation items
+const navigationItems = [
+  { name: 'Blog', href: '/blog', current: currentPath.startsWith('/blog') },
+  { name: 'About', href: '/about', current: currentPath === '/about' },
+  { name: 'Contact', href: '/contact', current: currentPath === '/contact' }
+];
+---
+
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 transition-all duration-300">
+  <div class="container-custom">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo and site name -->
+      <div class="flex items-center">
+      <a href="/" class="flex items-center space-x-3 text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+       <!-- The new image tag replaces the old SVG block -->
+       <img src="/images/logo.png" alt="CipherFlow Logo" class="w-8 h-8">
+  
+       <span class="hidden sm:block">CipherFlow</span>
+      </a>
+      </div>
+
+      <!-- Desktop navigation -->
+      <nav class="hidden md:flex items-center space-x-1">
+        {navigationItems.map((item) => (
+         <a
+         href={item.href}
+         class={`px-3 py-2 text-base font-medium transition-colors duration-200 ${
+         item.current 
+          ? 'text-primary-600 dark:text-primary-400' 
+         : 'text-gray-900 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'
+       }`}
+       aria-current={item.current ? 'page' : undefined}
+      >
+      {item.name}
+      </a>
+        ))}
+      </nav>
+
+      <!-- Right side actions -->
+      <div class="flex items-center space-x-3">
+        <!-- Search button -->
+        <button
+          id="search-toggle"
+          class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200"
+          aria-label="Search"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </button>
+
+        <!-- Theme toggle -->
+        <ThemeToggle />
+
+        <!-- Mobile menu button -->
+        <button
+          id="mobile-menu-toggle"
+          class="md:hidden p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors duration-200"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path id="menu-open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            <path id="menu-close" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile navigation menu -->
+    <div id="mobile-menu" class="md:hidden hidden border-t border-gray-200 dark:border-gray-800" data-closable>
+      <div class="px-2 pt-2 pb-3 space-y-1">
+        {navigationItems.map((item) => (
+          <a
+            href={item.href}
+            class={`block px-3 py-2 text-base font-medium rounded-md transition-colors duration-200 ${
+              item.current 
+                ? 'text-primary-600 bg-primary-50 dark:text-primary-400 dark:bg-primary-950' 
+                : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-primary-400 dark:hover:bg-gray-800'
+            }`}
+            aria-current={item.current ? 'page' : undefined}
+          >
+            {item.name}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- Search overlay -->
+  <div id="search-overlay" class="hidden fixed inset-0 z-60 bg-black/50 backdrop-blur-sm" data-closable>
+    <div class="min-h-screen px-4 text-center">
+      <div class="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-xl rounded-2xl">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white">Search</h3>
+          <button
+            id="search-close"
+            class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+            aria-label="Close search"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="relative">
+          <input
+            type="text"
+            id="search-input"
+            class="input pl-10 pr-4 text-gray-900 dark:text-gray-900"
+            placeholder="Search articles..."
+            autocomplete="off"
+          />
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+        </div>
+        
+        <div id="search-results" class="mt-4 max-h-60 overflow-y-auto">
+          <p class="text-sm text-gray-500 dark:text-gray-400">Start typing to search...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Progress bar for reading progress -->
+<div id="reading-progress" class="fixed top-16 left-0 h-1 bg-primary-600 dark:bg-primary-400 z-40 transition-all duration-300" style="width: 0%"></div>
+
+<script>
+  // Mobile menu toggle
+  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const menuOpen = document.getElementById('menu-open');
+  const menuClose = document.getElementById('menu-close');
+
+  mobileMenuToggle?.addEventListener('click', () => {
+    const isOpen = !mobileMenu?.classList.contains('hidden');
+    
+    if (isOpen) {
+      mobileMenu?.classList.add('hidden');
+      menuOpen?.classList.remove('hidden');
+      menuClose?.classList.add('hidden');
+      mobileMenuToggle?.setAttribute('aria-expanded', 'false');
+    } else {
+      mobileMenu?.classList.remove('hidden');
+      menuOpen?.classList.add('hidden');
+      menuClose?.classList.remove('hidden');
+      mobileMenuToggle?.setAttribute('aria-expanded', 'true');
+    }
+  });
+
+  // Search functionality
+  const searchToggle = document.getElementById('search-toggle');
+  const searchOverlay = document.getElementById('search-overlay');
+  const searchClose = document.getElementById('search-close');
+  const searchInput = document.getElementById('search-input');
+  const searchResults = document.getElementById('search-results');
+
+  function openSearch() {
+    searchOverlay?.classList.remove('hidden');
+    searchInput?.focus();
+  }
+
+  function closeSearch() {
+    searchOverlay?.classList.add('hidden');
+    if (searchInput) (searchInput as HTMLInputElement).value = '';
+    if (searchResults) searchResults.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Start typing to search...</p>';
+}
+
+  searchToggle?.addEventListener('click', openSearch);
+  searchClose?.addEventListener('click', closeSearch);
+  
+  searchOverlay?.addEventListener('click', (e) => {
+    if (e.target === searchOverlay) closeSearch();
+  });
+
+  // Search input handling
+  let searchTimeout: ReturnType<typeof setTimeout>;
+  searchInput?.addEventListener('input', (e) => {
+    const query = (e.target as HTMLInputElement).value;
+    
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      if (query.length > 2) {
+        performSearch(query);
+      } else {
+        if (searchResults) searchResults.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Start typing to search...</p>';
+      }
+    }, 300);
+  });
+
+  // Simple search function (you can enhance this with a real search API)
+  function performSearch(query: string) {
+    if (!searchResults) return;
+    
+    searchResults.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Searching...</p>';
+    
+    // Simulate search (replace with real search logic)
+    setTimeout(() => {
+      const mockResults = [
+        { title: 'Introduction to Data Visualization', href: '/blog/data-visualization-intro' },
+        { title: 'Advanced D3.js Techniques', href: '/blog/advanced-d3-techniques' },
+        { title: 'Machine Learning Basics', href: '/blog/ml-basics' }
+      ].filter(result => result.title.toLowerCase().includes(query.toLowerCase()));
+
+      if (mockResults.length > 0) {
+        searchResults.innerHTML = mockResults.map(result => `
+          <a href="${result.href}" class="block p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200">
+            <p class="text-sm font-medium text-gray-900 dark:text-white">${result.title}</p>
+          </a>
+        `).join('');
+      } else {
+        searchResults.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">No results found.</p>';
+      }
+    }, 500);
+  }
+
+  // Reading progress bar
+  const progressBar = document.getElementById('reading-progress');
+  
+  function updateReadingProgress() {
+    if (!progressBar) return;
+    
+    const scrollTop = window.pageYOffset;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPercent = (scrollTop / docHeight) * 100;
+    
+    progressBar.style.width = `${Math.min(scrollPercent, 100)}%`;
+  }
+
+  window.addEventListener('scroll', updateReadingProgress);
+  
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    // Cmd/Ctrl + K to open search
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      openSearch();
+    }
+    
+    // Escape to close search
+    if (e.key === 'Escape' && !searchOverlay?.classList.contains('hidden')) {
+      closeSearch();
+    }
+  });
+
+  // Close mobile menu when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!mobileMenuToggle?.contains(e.target as Node) && !mobileMenu?.contains(e.target as Node)) {
+      mobileMenu?.classList.add('hidden');
+      menuOpen?.classList.remove('hidden');
+      menuClose?.classList.add('hidden');
+      mobileMenuToggle?.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>

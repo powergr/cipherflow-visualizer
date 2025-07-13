@@ -1,0 +1,216 @@
+---
+const currentYear = new Date().getFullYear();
+
+// Footer navigation links
+const footerLinks = {
+  'Content': [
+    { name: 'All Posts', href: '/blog' },
+    { name: 'Categories', href: '/categories' },
+    { name: 'Tags', href: '/tags' },
+    { name: 'Archive', href: '/archive' }
+  ],
+  'About': [
+    { name: 'About Us', href: '/about' },
+    { name: 'Contact', href: '/contact' },
+    { name: 'Privacy Policy', href: '/privacy' },
+    { name: 'Terms of Service', href: '/terms' }
+  ],
+  'Resources': [
+    { name: 'RSS Feed', href: '/rss.xml' },
+    { name: 'Sitemap', href: '/sitemap.xml' },
+    { name: 'Documentation', href: '/docs' },
+    { name: 'API', href: '/api' }
+  ]
+};
+
+// Social media links
+const socialLinks = [
+  {
+    name: 'Twitter',
+    href: 'https://twitter.com/educationalblog',
+    icon: 'M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z'
+  },
+  {
+    name: 'GitHub',
+    href: 'https://github.com/educationalblog',
+    icon: 'M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22'
+  },
+  {
+    name: 'LinkedIn',
+    href: 'https://linkedin.com/company/educationalblog',
+    icon: 'M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z M4 6a2 2 0 100-4 2 2 0 000 4z'
+  },
+  {
+    name: 'YouTube',
+    href: 'https://youtube.com/@educationalblog',
+    icon: 'M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 11.75a29 29 0 00.46 5.33A2.78 2.78 0 003.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 001.94-2 29 29 0 00.46-5.25 29 29 0 00-.46-5.33z M9.75 15.02l5.75-3.27-5.75-3.27v6.54z'
+  }
+];
+---
+
+<footer class="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+  <!-- Main footer content -->
+  <div class="container-custom section-padding-sm">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <!-- Brand section -->
+      <div class="lg:col-span-2">
+        <div class="flex items-center space-x-3 mb-4">
+        <a href="/" class="flex items-center space-x-3 text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+         <!-- The new image tag replaces the old SVG block -->
+        <img src="/images/logo.png" alt="CipherFlow Logo" class="w-8 h-8">
+  
+        <span class="hidden sm:block">CipherFlow</span>
+        </a>
+        </div>
+        <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+         Exploring the ciphers that protect our digital world. CipherFlow is an independent project dedicated to making the principles of modern security visible and accessible to everyone.
+        </p>
+      
+        <!-- Social links -->
+        <div class="flex space-x-4">
+          {socialLinks.map((social) => (
+            <a
+              href={social.href}
+              class="text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
+              aria-label={`Follow us on ${social.name}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={social.icon}></path>
+              </svg>
+            </a>
+          ))}
+        </div>
+      </div>
+      <!-- Footer navigation -->
+      {Object.entries(footerLinks).map(([category, links]) => (
+        <div>
+          <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">{category}</h4>
+          <ul class="space-y-2">
+            {links.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
+                >
+                  {link.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </div>
+  
+  <!-- Bottom footer -->
+  <div class="border-t border-gray-200 dark:border-gray-800">
+    <div class="container-custom py-6">
+      <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+          <p>© {currentYear} CipherFlow. All rights reserved.</p>
+        </div>
+        
+        <div class="flex items-center space-x-6">
+          <!-- Legal links -->
+          <a href="/privacy" class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+            Privacy
+          </a>
+          <a href="/terms" class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+            Terms
+          </a>
+          <a href="/cookies" class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+            Cookies
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Cookie consent banner -->
+<div id="cookie-banner" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-50 no-print hidden">
+  <div class="container-custom py-4">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-gray-600 dark:text-gray-400">
+        <p>
+          We use cookies to enhance your experience and analyze our traffic. 
+          <a href="/cookies" class="text-primary-600 dark:text-primary-400 hover:underline">Learn more</a>
+        </p>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button id="cookie-accept" class="btn btn-primary text-sm px-4 py-2">
+          Accept
+        </button>
+        <button id="cookie-decline" class="btn btn-secondary text-sm px-4 py-2">
+          Decline
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  // Cookie consent handling
+  const cookieBanner = document.getElementById('cookie-banner');
+  const acceptBtn = document.getElementById('cookie-accept');
+  const declineBtn = document.getElementById('cookie-decline');
+
+  // Check if user has already made a choice
+  const cookieConsent = localStorage.getItem('cookie-consent');
+  if (!cookieConsent) {
+    // Show banner after a delay
+    setTimeout(() => {
+      cookieBanner?.classList.remove('hidden');
+    }, 2000);
+  }
+
+  acceptBtn?.addEventListener('click', () => {
+    localStorage.setItem('cookie-consent', 'accepted');
+    cookieBanner?.classList.add('hidden');
+    
+    // Enable analytics or other tracking here
+    console.log('Cookies accepted');
+  });
+
+  declineBtn?.addEventListener('click', () => {
+    localStorage.setItem('cookie-consent', 'declined');
+    cookieBanner?.classList.add('hidden');
+    
+    // Disable analytics or other tracking here
+    console.log('Cookies declined');
+  });
+
+  // External link handling
+  document.querySelectorAll('a[href^="http"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      // Add any external link tracking here
+      console.log('External link clicked:', (e.target as HTMLAnchorElement).href);
+    });
+  });
+
+  // Lazy loading for social media embeds (if any)
+  const observerOptions = {
+    root: null,
+    rootMargin: '50px',
+    threshold: 0.1
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const element = entry.target as HTMLElement;
+        // Load social media widgets or other heavy content
+        element.classList.add('loaded');
+        observer.unobserve(element);
+      }
+    });
+  }, observerOptions);
+
+  // Observe any elements that need lazy loading
+  document.querySelectorAll('[data-lazy]').forEach(el => {
+    observer.observe(el);
+  });
+</script>
