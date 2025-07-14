@@ -1,0 +1,365 @@
+---
+// src/components/visualizers/CaesarVisualizer.astro
+
+// Generate a unique ID using standard JavaScript. This runs on the server.
+const uniqueId = `vis-${Math.random().toString(36).slice(2)}`;
+---
+
+<!-- 1. THE TEMPLATE -->
+<!-- We assign the unique ID to the main container. -->
+<div class="visualizer-container" id={uniqueId}>
+    <h1>🔐 Caesar Cipher Visualizer</h1>
+    <div class="controls">
+        <div class="control-group">
+            <label for={`plaintext-${uniqueId}`}>Plain Text:</label>
+            <input type="text" id={`plaintext-${uniqueId}`} placeholder="Enter text to encrypt" value="HELLO">
+        </div>
+        <div class="control-group">
+            <label for={`shift-${uniqueId}`}>Shift Value: <span class="shift-display">3</span></label>
+            <input type="range" id={`shift-${uniqueId}`} min="1" max="25" value="3">
+        </div>
+        <div class="speed-controls">
+            <label for={`speed-${uniqueId}`}>Speed:</label>
+            <input type="range" id={`speed-${uniqueId}`} min="1" max="10" value="5">
+            <span class="speed-display">5</span>
+        </div>
+        <button class="encrypt-btn">🔒 Encrypt</button>
+        <button class="decrypt-btn">🔓 Decrypt</button>
+        <button class="reset-btn">↻ Reset</button>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill"></div>
+    </div>
+    <div class="visualization">
+        <div class="step-info">Enter text and click a button to start!</div>
+        <div class="alphabet-wheel"></div>
+        <div class="text-display">
+            <span class="current-text">HELLO</span>
+        </div>
+    </div>
+</div>
+
+<!-- 2. THE SCRIPT -->
+<!-- is:inline tells Astro to not process this script. -->
+<!-- define:vars passes the unique ID from Astro's server to this browser script. -->
+<script is:inline define:vars={{ containerId: uniqueId }}>
+    // This self-contained function runs immediately for each visualizer on the page.
+    function initializeVisualizer(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return; 
+
+        const elements = {
+            plaintextInput: container.querySelector(`#plaintext-${containerId}`),
+            shiftInput: container.querySelector(`#shift-${containerId}`),
+            speedInput: container.querySelector(`#speed-${containerId}`),
+            encryptBtn: container.querySelector('.encrypt-btn'),
+            decryptBtn: container.querySelector('.decrypt-btn'),
+            resetBtn: container.querySelector('.reset-btn'),
+            stepInfo: container.querySelector('.step-info'),
+            textDisplay: container.querySelector('.current-text'),
+            shiftDisplay: container.querySelector('.shift-display'),
+            speedDisplay: container.querySelector('.speed-display'),
+            progressFill: container.querySelector('.progress-fill'),
+            alphabetWheel: container.querySelector('.alphabet-wheel')
+        };
+        
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        let isAnimating = false;
+        let animationSpeed = 1000;
+        let currentText = 'HELLO';
+        let resultText = '';
+        let mode = 'encrypt';
+
+        const createAlphabetWheel = () => {
+            elements.alphabetWheel.innerHTML = '';
+            alphabet.forEach((letter, index) => {
+                const letterBox = document.createElement('div');
+                letterBox.className = 'letter-box';
+                letterBox.textContent = letter;
+                letterBox.id = `${containerId}-letter-${index}`;
+                elements.alphabetWheel.appendChild(letterBox);
+            });
+        };
+
+        const updateDisplay = () => {
+            currentText = elements.plaintextInput.value.toUpperCase().replace(/[^A-Z]/g, '');
+            elements.textDisplay.textContent = currentText;
+            elements.plaintextInput.value = currentText;
+        };
+
+        const updateShiftDisplay = () => {
+            elements.shiftDisplay.textContent = elements.shiftInput.value;
+        };
+
+        const updateSpeedDisplay = () => {
+            const speedValue = parseInt(elements.speedInput.value, 10);
+            elements.speedDisplay.textContent = speedValue;
+            animationSpeed = 1100 - (speedValue * 100);
+        };
+
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        const updateProgress = (percentage) => {
+            elements.progressFill.style.width = percentage + '%';
+        };
+
+        const animateLetter = async (letter, shift, position) => {
+            const letterIndex = alphabet.indexOf(letter);
+            
+            elements.alphabetWheel.querySelectorAll('.letter-box').forEach(box => box.classList.remove('highlight', 'result'));
+            
+            if (letterIndex === -1) { 
+                resultText += letter;
+                return;
+            }
+
+            const currentBox = container.querySelector(`#${containerId}-letter-${letterIndex}`);
+            if(currentBox) currentBox.classList.add('highlight');
+            
+            elements.stepInfo.textContent = `${mode === 'encrypt' ? 'Encrypting' : 'Decrypting'} '${letter}'`;
+            await sleep(animationSpeed / 2);
+            
+            const effectiveShift = mode === 'encrypt' ? parseInt(shift) : -parseInt(shift);
+            const newIndex = (letterIndex + effectiveShift + 26) % 26;
+            const newLetter = alphabet[newIndex];
+            
+            const resultBox = container.querySelector(`#${containerId}-letter-${newIndex}`);
+            if(resultBox) resultBox.classList.add('result');
+            
+            elements.stepInfo.textContent = `'${letter}' → '${newLetter}' (shift ${effectiveShift > 0 ? '+' : ''}${effectiveShift})`;
+            resultText += newLetter;
+            await sleep(animationSpeed / 2);
+        };
+
+        const startAnimation = async (animMode) => {
+            if (isAnimating) return;
+            mode = animMode;
+            isAnimating = true;
+            resultText = '';
+            
+            elements.encryptBtn.disabled = true;
+            elements.decryptBtn.disabled = true;
+            
+            const textToProcess = currentText;
+            const shiftValue = elements.shiftInput.value;
+            
+            if (textToProcess.length === 0) {
+                elements.stepInfo.textContent = 'Please enter some text first!';
+                isAnimating = false;
+                elements.encryptBtn.disabled = false;
+                elements.decryptBtn.disabled = false;
+                return;
+            }
+            
+            for (let i = 0; i < textToProcess.length; i++) {
+                await animateLetter(textToProcess[i], shiftValue, i);
+                updateProgress((i + 1) / textToProcess.length * 100);
+            }
+            
+            elements.stepInfo.textContent = `Operation complete!`;
+            elements.textDisplay.textContent = resultText;
+            isAnimating = false;
+            elements.encryptBtn.disabled = false;
+            elements.decryptBtn.disabled = false;
+        };
+
+        const reset = () => {
+            isAnimating = false;
+            updateProgress(0);
+            updateDisplay();
+            elements.stepInfo.textContent = 'Enter text and click a button to start!';
+            elements.encryptBtn.disabled = false;
+            elements.decryptBtn.disabled = false;
+            elements.alphabetWheel.querySelectorAll('.letter-box').forEach(box => box.classList.remove('highlight', 'result'));
+        };
+
+        // Setup Event Listeners
+        elements.encryptBtn.addEventListener('click', () => startAnimation('encrypt'));
+        elements.decryptBtn.addEventListener('click', () => startAnimation('decrypt'));
+        elements.resetBtn.addEventListener('click', reset);
+        elements.plaintextInput.addEventListener('input', updateDisplay);
+        elements.shiftInput.addEventListener('input', updateShiftDisplay);
+        elements.speedInput.addEventListener('input', updateSpeedDisplay);
+
+        // Initial setup
+        createAlphabetWheel();
+        updateShiftDisplay();
+        updateSpeedDisplay();
+    }
+
+    // Run the setup function, passing in the unique ID from Astro.
+    initializeVisualizer(containerId);
+</script>
+
+
+<!-- 3. THE STYLES -->
+<style>
+    .visualizer-container {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 2rem 0;
+        padding: 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .visualizer-container h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2.5em;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .visualizer-container .controls {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .visualizer-container .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .visualizer-container label {
+        font-weight: bold;
+        font-size: 14px;
+    }
+    
+    .visualizer-container input[type="text"] {
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        width: 200px;
+        background: rgba(255, 255, 255, 0.9);
+        color: #333;
+    }
+    
+    .visualizer-container input[type="range"] {
+        width: 150px;
+    }
+    
+    .visualizer-container button {
+        padding: 12px 24px;
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: bold;
+    }
+    
+    .visualizer-container button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .visualizer-container button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .visualizer-container .visualization {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+        min-height: 400px;
+    }
+    
+    .visualizer-container .alphabet-wheel {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 20px 0;
+    }
+    
+    .visualizer-container .letter-box {
+        width: 40px;
+        height: 40px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 2px;
+        font-weight: bold;
+        font-size: 18px;
+        background: rgba(255, 255, 255, 0.1);
+        transition: all 0.5s ease;
+    }
+    
+    .visualizer-container .letter-box.highlight {
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        border-color: #fff;
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.5);
+    }
+    
+    .visualizer-container .letter-box.result {
+        background: linear-gradient(45deg, #51cf66, #40c057);
+        border-color: #fff;
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(81, 207, 102, 0.5);
+    }
+    
+    .visualizer-container .text-display {
+        font-family: 'Courier New', monospace;
+        font-size: 24px;
+        text-align: center;
+        margin: 20px 0;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        word-break: break-all;
+    }
+    
+    .visualizer-container .step-info {
+        text-align: center;
+        font-size: 18px;
+        margin: 15px 0;
+        min-height: 25px;
+    }
+    
+    .visualizer-container .shift-display {
+        font-size: 20px;
+        font-weight: bold;
+        color: #ffeb3b;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    .visualizer-container .speed-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .visualizer-container .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        margin: 10px 0;
+        overflow: hidden;
+    }
+    
+    .visualizer-container .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #51cf66, #40c057);
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+</style>

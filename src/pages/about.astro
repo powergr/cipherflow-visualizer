@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const pageTitle = "About CipherFlow";
+const pageDescription = "Learn more about the mission behind CipherFlow and our dedication to making cryptography accessible to everyone.";
+---
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <div class="container mx-auto px-6 py-16">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-6">About Us</h1>
+      <div class="prose dark:prose-invert max-w-none">
+        <p>
+          This is the about page for CipherFlow. Our mission is to demystify complex cryptographic algorithms through clear, step-by-step visualizations.
+        </p>
+        <p>
+          We believe that understanding the fundamentals of digital security is crucial in today's world. This project is an independent initiative dedicated to providing high-quality educational tools for students, developers, and the security-curious.
+        </p>
+        <p>
+          More content will be added here soon!
+        </p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

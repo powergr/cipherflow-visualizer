@@ -1,6 +1,7 @@
 ---
 import logo from '/public/images/logo.png';
 const currentYear = new Date().getFullYear();
+const base = import.meta.env.BASE_URL;
 
 // Footer navigation links
 const footerLinks = {
@@ -56,7 +57,7 @@ const socialLinks = [
       <!-- Brand section -->
       <div class="lg:col-span-2">
         <div class="flex items-center space-x-3 mb-4">
-        <a href="/" class="flex items-center space-x-3 text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+        <a href={base} class="flex items-center space-x-3 text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
          <!-- The new image tag replaces the old SVG block -->
         <img src={logo.src} alt="CipherFlow Logo" class="w-8 h-8">
   
@@ -92,7 +93,7 @@ const socialLinks = [
             {links.map((link) => (
               <li>
                 <a
-                  href={link.href}
+                  href=`${base}${link.href}`
                   class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
                 >
                   {link.name}
@@ -115,13 +116,13 @@ const socialLinks = [
         
         <div class="flex items-center space-x-6">
           <!-- Legal links -->
-          <a href="/privacy" class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+          <a href=`${base}/privacy` class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
             Privacy
           </a>
-          <a href="/terms" class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+          <a href=`${base}/terms` class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
             Terms
           </a>
-          <a href="/cookies" class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+          <a href=`${base}/cookies` class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
             Cookies
           </a>
         </div>
@@ -137,7 +138,7 @@ const socialLinks = [
       <div class="text-sm text-gray-600 dark:text-gray-400">
         <p>
           We use cookies to enhance your experience and analyze our traffic. 
-          <a href="/cookies" class="text-primary-600 dark:text-primary-400 hover:underline">Learn more</a>
+          <a href=`${base}/cookies` class="text-primary-600 dark:text-primary-400 hover:underline">Learn more</a>
         </p>
       </div>
       <div class="flex items-center space-x-3">
@@ -153,7 +154,6 @@ const socialLinks = [
 </div>
 
 <script>
-
   // Cookie consent handling
   const cookieBanner = document.getElementById('cookie-banner');
   const acceptBtn = document.getElementById('cookie-accept');
@@ -186,10 +186,13 @@ const socialLinks = [
 
   // External link handling
   document.querySelectorAll('a[href^="http"]').forEach(link => {
-    link.addEventListener('click', (e) => {
-      // Add any external link tracking here
-      console.log('External link clicked:', (e.target as HTMLAnchorElement).href);
-    });
+    // This check ensures the element is an anchor tag before trying to access its href property.
+    if (link instanceof HTMLAnchorElement) {
+      link.addEventListener('click', () => {
+        // Add any external link tracking here
+        console.log('External link clicked:', link.href);
+      });
+    }
   });
 
   // Lazy loading for social media embeds (if any)
@@ -202,7 +205,7 @@ const socialLinks = [
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        const element = entry.target as HTMLElement;
+        const element = entry.target;
         // Load social media widgets or other heavy content
         element.classList.add('loaded');
         observer.unobserve(element);

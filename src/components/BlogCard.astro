@@ -1,0 +1,88 @@
+---
+// src/components/BlogCard.astro
+
+// Define the shape of the 'post' prop we expect
+export interface Props {
+  post: {
+    slug: string;
+    data: {
+      title: string;
+      description: string;
+      pubDate: Date;
+      image?: string;
+      imageAlt?: string;
+      category?: string;
+      difficulty?: 'beginner' | 'intermediate' | 'advanced';
+    };
+  };
+}
+
+const { post } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+// Format date for display
+const formattedDate = new Date(post.data.pubDate).toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+// Define colors for difficulty badges
+const difficultyColors = {
+  beginner: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  intermediate: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+  advanced: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+};
+---
+
+<article class="group flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+  <!-- Card Image -->
+  {post.data.image && (
+    <div class="overflow-hidden">
+      <a href=`${base}/blog/${post.slug}`>
+        <img 
+          src={post.data.image} 
+          alt={post.data.imageAlt || post.data.title}
+          class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          loading="lazy"
+        />
+      </a>
+    </div>
+  )}
+
+  <!-- Card Content -->
+  <div class="p-6 flex flex-col flex-grow">
+    <!-- Badges -->
+    <div class="flex items-center gap-3 mb-3">
+      {post.data.category && (
+        <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full">
+          {post.data.category}
+        </span>
+      )}
+      {post.data.difficulty && (
+        <span class={`px-3 py-1 text-xs font-medium rounded-full ${difficultyColors[post.data.difficulty]}`}>
+          {post.data.difficulty.charAt(0).toUpperCase() + post.data.difficulty.slice(1)}
+        </span>
+      )}
+    </div>
+
+    <!-- Title -->
+    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2 flex-grow">
+      <a href=`${base}/blog/${post.slug}` class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+        {post.data.title}
+      </a>
+    </h2>
+
+    <!-- Description -->
+    <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm">
+      {post.data.description}
+    </p>
+
+    <!-- Meta Info -->
+    <div class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
+      <time datetime={post.data.pubDate.toISOString()}>
+        {formattedDate}
+      </time>
+    </div>
+  </div>
+</article>

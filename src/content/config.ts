@@ -1,5 +1,5 @@
 // config.ts
-import { defineCollection, z } from 'astro:content';
+import { defineCollection, z, type CollectionEntry } from 'astro:content';
 
 const blogCollection = defineCollection({
   type: 'content',
@@ -36,6 +36,9 @@ const blogCollection = defineCollection({
     
     // Schema.org structured data
     articleType: z.enum(['article', 'tutorial', 'guide', 'review', 'news']).default('article'),
+
+    // ADD THIS: The visualizer property for our dynamic components
+    visualizer: z.string().optional(),
   })
 });
 
@@ -44,48 +47,35 @@ export const collections = {
   blog: blogCollection,
 };
 
-// Type exports for use in components
-export type BlogPost = {
-  slug: string;
-  data: z.infer<typeof blogCollection.schema>;
-  body: string;
-};
-
-// Helper function to validate and transform blog post data
-export function validateBlogPost(post: any): BlogPost {
-  const validatedData = blogCollection.schema.parse(post.data);
-  return {
-    slug: post.slug,
-    data: validatedData,
-    body: post.body
-  };
-}
+// NOTE: We no longer need the custom BlogPost type or the validateBlogPost function,
+// because CollectionEntry<'blog'> from Astro does this for us automatically and more safely.
 
 // Utility functions for filtering and sorting posts
+// All instances of 'BlogPost' have been replaced with Astro's 'CollectionEntry<'blog'>'
 export const blogUtils = {
   // Filter out draft posts in production
-  filterPublished: (posts: BlogPost[]) => {
+  filterPublished: (posts: CollectionEntry<'blog'>[]) => {
     return import.meta.env.PROD 
       ? posts.filter(post => !post.data.draft)
       : posts;
   },
   
   // Sort posts by publication date (newest first)
-  sortByDate: (posts: BlogPost[]) => {
+  sortByDate: (posts: CollectionEntry<'blog'>[]) => {
     return posts.sort((a, b) => 
       new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
     );
   },
   
   // Filter posts by category
-  filterByCategory: (posts: BlogPost[], category: string) => {
+  filterByCategory: (posts: CollectionEntry<'blog'>[], category: string) => {
     return posts.filter(post => 
       post.data.category?.toLowerCase() === category.toLowerCase()
     );
   },
   
   // Filter posts by tag
-  filterByTag: (posts: BlogPost[], tag: string) => {
+  filterByTag: (posts: CollectionEntry<'blog'>[], tag: string) => {
     return posts.filter(post => 
       post.data.tags.some(postTag => 
         postTag.toLowerCase() === tag.toLowerCase()
@@ -94,17 +84,17 @@ export const blogUtils = {
   },
   
   // Filter posts by difficulty level
-  filterByDifficulty: (posts: BlogPost[], difficulty: 'beginner' | 'intermediate' | 'advanced') => {
+  filterByDifficulty: (posts: CollectionEntry<'blog'>[], difficulty: 'beginner' | 'intermediate' | 'advanced') => {
     return posts.filter(post => post.data.difficulty === difficulty);
   },
   
   // Get featured posts
-  getFeatured: (posts: BlogPost[]) => {
+  getFeatured: (posts: CollectionEntry<'blog'>[]) => {
     return posts.filter(post => post.data.featured);
   },
   
   // Get related posts based on tags
-  getRelated: (posts: BlogPost[], currentPost: BlogPost, limit: number = 3) => {
+  getRelated: (posts: CollectionEntry<'blog'>[], currentPost: CollectionEntry<'blog'>, limit: number = 3) => {
     const currentTags = currentPost.data.tags;
     const relatedPosts = posts
       .filter(post => post.slug !== currentPost.slug)
@@ -121,7 +111,7 @@ export const blogUtils = {
   },
   
   // Get unique tags from all posts
-  getAllTags: (posts: BlogPost[]) => {
+  getAllTags: (posts: CollectionEntry<'blog'>[]) => {
     const tagSet = new Set<string>();
     posts.forEach(post => {
       post.data.tags.forEach(tag => tagSet.add(tag));
@@ -130,7 +120,7 @@ export const blogUtils = {
   },
   
   // Get unique categories from all posts
-  getAllCategories: (posts: BlogPost[]) => {
+  getAllCategories: (posts: CollectionEntry<'blog'>[]) => {
     const categorySet = new Set<string>();
     posts.forEach(post => {
       if (post.data.category) {
@@ -142,6 +132,7 @@ export const blogUtils = {
   
   // Calculate estimated read time based on content
   calculateReadTime: (content: string, wordsPerMinute: number = 200) => {
+    if (!content) return 0;
     const words = content.trim().split(/\s+/).length;
     const minutes = Math.ceil(words / wordsPerMinute);
     return minutes;
