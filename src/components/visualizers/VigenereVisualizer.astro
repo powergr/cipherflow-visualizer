@@ -1,0 +1,280 @@
+---
+// src/components/visualizers/VigenereVisualizer.astro
+import VisualizerLayout from './VisualizerLayout.astro';
+
+---
+
+<VisualizerLayout title="Vigenère Cipher Visualizer" uniqueId="vigenere-visualizer">
+
+    {/* The main controls (text input, keyword, speed) are placed in the "controls" slot. */}
+    <div slot="controls">
+        <div class="control-group">
+            <label for="plaintext">Enter Text:</label>
+            <input type="text" id="plaintext" value="ATTACKATDAWN" maxlength="50">
+        </div>
+
+        <div class="control-group">
+            <label for="keyword">Keyword:</label>
+            <input type="text" id="keyword" value="LEMON" maxlength="20">
+        </div>
+
+        <div class="control-group">
+            <label for="speed">Speed:</label>
+            <div class="speed-controls">
+                <input type="range" id="speed" min="1" max="10" value="5">
+                <span id="speed-display">5</span>
+            </div>
+        </div>
+    </div>
+
+    {/* The action buttons are placed in the "actions" slot. */}
+    <div slot="actions">
+        <button id="encrypt-btn">🔒 Encrypt</button>
+        <button id="decrypt-btn">🔓 Decrypt</button>
+        <button id="reset-btn">↻ Reset</button>
+    </div>
+
+    {/* The core visualization elements from index.html go into the "visualization-panel" slot. */}
+    <div slot="visualization-panel">
+        <div class="operation-display">
+            <div id="plain-char" class="letter-box">P</div>
+            <div id="operator">+</div>
+            <div id="key-char" class="letter-box">K</div>
+            <div>=</div>
+            <div id="result-char" class="letter-box">R</div>
+        </div>
+        <div class="alphabet-wheel" id="alphabet-wheel"></div>
+    </div>
+    
+    {/* The initial text content is placed in the "text-display" slot. */}
+    <div slot="text-display">ATTACKATDAWN</div>
+
+    {/* The D3.js library and the main visualizer script are placed in the "script" slot. */}
+    <div slot="script">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+        <script is:inline>
+            // The JavaScript class from index.html is adapted to work with the Astro layout.
+            class VigenereCipherVisualizer {
+                constructor() {
+                    this.alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    this.isAnimating = false;
+                    this.animationSpeed = 1500;
+                    
+                    this.initializeElements();
+                    this.setupEventListeners();
+                    this.createAlphabetWheel();
+                    this.updateDisplay();
+                }
+
+                initializeElements() {
+                    const container = document.getElementById('vigenere-visualizer');
+                    
+                    // Inputs and Controls
+                    this.plaintextInput = container.querySelector('#plaintext');
+                    this.keywordInput = container.querySelector('#keyword');
+                    this.speedInput = container.querySelector('#speed');
+                    this.speedDisplay = container.querySelector('#speed-display');
+                    
+                    // Buttons
+                    this.encryptBtn = container.querySelector('#encrypt-btn');
+                    this.decryptBtn = container.querySelector('#decrypt-btn');
+                    this.resetBtn = container.querySelector('#reset-btn');
+
+                    // Visualization Elements
+                    this.stepInfo = container.querySelector('.step-info');
+                    this.textDisplay = container.querySelector('.text-display'); 
+                    this.progressFill = container.querySelector('.progress-fill');
+                    this.alphabetWheel = container.querySelector('#alphabet-wheel');
+
+                    // Operation Display
+                    this.plainCharBox = container.querySelector('#plain-char');
+                    this.keyCharBox = container.querySelector('#key-char');
+                    this.resultCharBox = container.querySelector('#result-char');
+                    this.operatorDisplay = container.querySelector('#operator');
+                }
+
+                setupEventListeners() {
+                    this.plaintextInput.addEventListener('input', () => this.updateDisplay());
+                    this.keywordInput.addEventListener('input', () => this.updateDisplay());
+                    this.speedInput.addEventListener('input', () => this.updateSpeedDisplay());
+
+                    this.encryptBtn.addEventListener('click', () => this.startAnimation('encrypt'));
+                    this.decryptBtn.addEventListener('click', () => this.startAnimation('decrypt'));
+                    this.resetBtn.addEventListener('click', () => this.reset());
+                }
+
+                updateDisplay() {
+                    let text = this.plaintextInput.value.toUpperCase().replace(/[^A-Z]/g, '');
+                    this.plaintextInput.value = text;
+                    this.textDisplay.textContent = text;
+
+                    let keyword = this.keywordInput.value.toUpperCase().replace(/[^A-Z]/g, '');
+                    this.keywordInput.value = keyword;
+                }
+                
+                updateSpeedDisplay() {
+                    this.speedDisplay.textContent = this.speedInput.value;
+                    this.animationSpeed = 2100 - (parseInt(this.speedInput.value) * 200);
+                }
+                
+                generateRepeatingKey(text, keyword) {
+                    if (!keyword) return '';
+                    return keyword.repeat(Math.ceil(text.length / keyword.length)).substring(0, text.length);
+                }
+
+                createAlphabetWheel() {
+                    this.alphabetWheel.innerHTML = '';
+                    this.alphabet.split('').forEach((letter, index) => {
+                        const letterBox = document.createElement('div');
+                        letterBox.className = 'letter-box';
+                        letterBox.textContent = letter;
+                        letterBox.id = `letter-${index}`;
+                        this.alphabetWheel.appendChild(letterBox);
+                    });
+                }
+                
+                async startAnimation(mode) {
+                    if (this.isAnimating) return;
+                    
+                    this.updateDisplay();
+                    const text = this.plaintextInput.value;
+                    const keyword = this.keywordInput.value;
+                    
+                    if (!text || !keyword) {
+                        this.stepInfo.textContent = "Please enter both text and a keyword.";
+                        return;
+                    }
+                    
+                    this.isAnimating = true;
+                    this.setControlsState(false);
+                    this.updateProgress(0);
+
+                    const repeatingKey = this.generateRepeatingKey(text, keyword);
+                    this.operatorDisplay.textContent = mode === 'encrypt' ? '+' : '−';
+                    let resultText = '';
+                    
+                    for (let i = 0; i < text.length; i++) {
+                        const plainChar = text[i];
+                        const keyChar = repeatingKey[i];
+                        
+                        const plainIndex = this.alphabet.indexOf(plainChar);
+                        const keyIndex = this.alphabet.indexOf(keyChar);
+                        
+                        const shift = mode === 'encrypt' ? keyIndex : -keyIndex;
+                        const resultIndex = (plainIndex + shift + 26) % 26;
+                        const resultChar = this.alphabet[resultIndex];
+
+                        await this.animateStep(plainChar, keyChar, resultChar, plainIndex, resultIndex, resultText, text);
+                        
+                        resultText += resultChar;
+                        this.updateProgress(((i + 1) / text.length) * 100);
+                    }
+
+                    this.stepInfo.innerHTML = `${mode.charAt(0).toUpperCase() + mode.slice(1)}ion Complete! Result: <b style="color: #51cf66;">${resultText}</b>`;
+                    this.textDisplay.textContent = resultText;
+                    this.isAnimating = false;
+                    this.setControlsState(true);
+                }
+                
+                async animateStep(plainChar, keyChar, resultChar, plainIndex, resultIndex, processedText, fullText) {
+                    d3.selectAll(".letter-box").attr("class", "letter-box");
+                    
+                    const pos = processedText.length;
+                    this.textDisplay.innerHTML = `<span style="color:#a5d8ff;">${processedText}</span>` +
+                                                 `<span style="background:rgba(255,107,107,0.5);">${plainChar}</span>` +
+                                                 `<span>${fullText.substring(pos + 1)}</span>`;
+
+                    this.plainCharBox.textContent = plainChar;
+                    this.plainCharBox.classList.add('highlight-plain');
+
+                    this.keyCharBox.textContent = keyChar;
+                    this.keyCharBox.classList.add('highlight-key');
+                    
+                    this.resultCharBox.textContent = '?';
+                    this.resultCharBox.classList.remove('highlight-result');
+
+                    
+                    this.stepInfo.textContent = `Processing '${plainChar}' with key letter '${keyChar}'...`;
+                    d3.select(`#letter-${plainIndex}`).classed("highlight-plain", true);
+                    
+                    await this.sleep(this.animationSpeed);
+
+                    this.stepInfo.innerHTML = `'${plainChar}' shifts by '${keyChar}' to produce '<b>${resultChar}</b>'`;
+                    d3.select(`#letter-${resultIndex}`).classed("highlight-result", true);
+                    this.resultCharBox.textContent = resultChar;
+                    this.resultCharBox.classList.add('highlight-result');
+
+                    await this.sleep(this.animationSpeed / 2);
+                }
+
+                updateProgress(percentage) {
+                    this.progressFill.style.width = percentage + '%';
+                }
+
+                setControlsState(enabled) {
+                    this.encryptBtn.disabled = !enabled;
+                    this.decryptBtn.disabled = !enabled;
+                    this.resetBtn.disabled = !enabled;
+                    this.plaintextInput.disabled = !enabled;
+                    this.keywordInput.disabled = !enabled;
+                }
+
+                sleep(ms) {
+                    return new Promise(resolve => setTimeout(resolve, ms));
+                }
+
+                reset() {
+                    this.isAnimating = false;
+                    this.setControlsState(true);
+                    this.updateProgress(0);
+                    this.plaintextInput.value = "ATTACKATDAWN";
+                    this.keywordInput.value = "LEMON";
+                    this.updateDisplay();
+                    this.stepInfo.textContent = "Enter text and a keyword to begin.";
+                    d3.selectAll(".letter-box").attr("class", "letter-box");
+                    this.plainCharBox.textContent = 'P';
+                    this.keyCharBox.textContent = 'K';
+                    this.resultCharBox.textContent = 'R';
+                    this.operatorDisplay.textContent = '+';
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                new VigenereCipherVisualizer();
+            });
+        </script>
+    </div>
+</VisualizerLayout>
+
+<!-- These styles are specific to the Vigenère visualizer and are added here. -->
+<style>
+    .operation-display {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        margin: 20px 0;
+        font-size: 2em;
+        font-weight: bold;
+    }
+
+    /* The letter-box class is global, but the specific highlight styles are local to this component */
+    .letter-box.highlight-plain { background: linear-gradient(45deg, #ff6b6b, #ee5a24); }
+    .letter-box.highlight-key { background: linear-gradient(45deg, #667eea, #764ba2); }
+    .letter-box.highlight-result { background: linear-gradient(45deg, #51cf66, #40c057); }
+
+    /* The layout provides a generic .letter-box, ensure it's styled correctly */
+    .alphabet-wheel .letter-box {
+        width: 40px;
+        height: 40px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 2px;
+        font-weight: bold;
+        font-size: 18px;
+        background: rgba(255, 255, 255, 0.1);
+        transition: all 0.5s ease;
+    }
+</style>

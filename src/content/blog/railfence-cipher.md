@@ -4,7 +4,7 @@ description: "Learn about Mathematical Elegance in Classical Cryptography"
 difficulty: "beginner"
 pubDate: 2025-07-15
 author: "Pashalis Laoutaris"
-category: "Basic Classic Symmetric"
+category: "Basic Classic Symmetric Ciphers"
 visualizer: "RailFenceVisualizer"
 ---
 ## The Rail Fence Cipher: A Complete Educational Guide

@@ -6,6 +6,7 @@ import CaesarVisualizer from '../../components/visualizers/CaesarVisualizer.astr
 import HillVisualizer from '../../components/visualizers/HillVisualizer.astro';
 import PlayfairVisualizer from '../../components/visualizers/PlayfairVisualizer.astro';
 import RailFenceVisualizer from '../../components/visualizers/RailFenceVisualizer.astro';
+import VigenereVisualizer from '../../components/visualizers/VigenereVisualizer.astro';
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection('blog');
@@ -113,6 +114,15 @@ const socialImageUrl = socialImage || image || '/images/default-blog-image.jpg';
         Interactive Rail Fence Visualizer
       </h2>
       <RailFenceVisualizer />
+    </div>
+  )}
+
+     {entry.data.visualizer === 'VigenereVisualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive Vigenère Cipher Visualizer
+      </h2>
+      <VigenereVisualizer />
     </div>
   )}
 
