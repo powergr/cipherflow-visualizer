@@ -1,0 +1,31 @@
+---
+// src/pages/categories/index.astro
+import { getCollection } from 'astro:content';
+import { blogUtils } from '../../content/config';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const allPosts = await getCollection('blog');
+const publishedPosts = blogUtils.filterPublished(allPosts);
+const allCategories = blogUtils.getAllCategories(publishedPosts);
+
+const pageTitle = "All Categories";
+const pageDescription = "Browse all blog post categories on CipherFlow.";
+const base = import.meta.env.BASE_URL;
+---
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <div class="container mx-auto px-6 py-16">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-8 text-center">Blog Categories</h1>
+      <div class="flex flex-wrap justify-center gap-4">
+        {allCategories.map(category => (
+          <a 
+            href=`${base}/categories/${category.toLowerCase().replace(/\s+/g, '-')}`
+            class="px-6 py-3 bg-white dark:bg-gray-800 text-lg font-semibold text-gray-800 dark:text-white rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+          >
+            {category}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</BaseLayout>

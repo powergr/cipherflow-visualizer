@@ -1,0 +1,47 @@
+---
+// src/pages/categories/[category].astro
+import { getCollection } from 'astro:content';
+import { blogUtils } from '../../content/config';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogCard from '../../components/BlogCard.astro';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('blog');
+  const publishedPosts = blogUtils.filterPublished(allPosts);
+  const allCategories = blogUtils.getAllCategories(publishedPosts);
+
+  return allCategories.map(category => ({
+    params: { category: category.toLowerCase().replace(/\s+/g, '-') },
+    props: { categoryName: category },
+  }));
+}
+
+const { categoryName } = Astro.props;
+const allPosts = await getCollection('blog');
+const publishedPosts = blogUtils.filterPublished(allPosts);
+
+const postsInCategory = publishedPosts.filter(post => 
+  post.data.category?.toLowerCase() === categoryName.toLowerCase()
+);
+
+const pageTitle = `Category: ${categoryName}`;
+const pageDescription = `All posts filed under the category: ${categoryName}.`;
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <div class="container mx-auto px-6 py-16">
+    <div class="text-center mb-12">
+      <p class="text-lg text-blue-600 dark:text-blue-400 font-semibold mb-2">CATEGORY</p>
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-white">{categoryName}</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300 mt-4">
+        Showing {postsInCategory.length} post(s) in this category.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      {postsInCategory.map(post => (
+        <BlogCard {post} />
+      ))}
+    </div>
+  </div>
+</BaseLayout>

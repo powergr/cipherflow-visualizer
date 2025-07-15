@@ -3,6 +3,9 @@
 import { getCollection } from 'astro:content';
 import BlogLayout from '../../layouts/BlogLayout.astro';
 import CaesarVisualizer from '../../components/visualizers/CaesarVisualizer.astro';
+import HillVisualizer from '../../components/visualizers/HillVisualizer.astro';
+import PlayfairVisualizer from '../../components/visualizers/PlayfairVisualizer.astro';
+import RailFenceVisualizer from '../../components/visualizers/RailFenceVisualizer.astro';
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection('blog');
@@ -80,9 +83,36 @@ const socialImageUrl = socialImage || image || '/images/default-blog-image.jpg';
   {entry.data.visualizer === 'CaesarVisualizer' && (
     <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
       <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
-        Interactive Visualizer
+        Interactive Caesar Visualizer
       </h2>
       <CaesarVisualizer />
+    </div>
+  )}
+
+    {entry.data.visualizer === 'HillVisualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive Hill Visualizer
+      </h2>
+      <HillVisualizer />
+    </div>
+  )}
+
+  {entry.data.visualizer === 'PlayfairVisualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive Playfair Visualizer
+      </h2>
+      <PlayfairVisualizer />
+    </div>
+  )}
+
+   {entry.data.visualizer === 'RailFenceVisualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive Rail Fence Visualizer
+      </h2>
+      <RailFenceVisualizer />
     </div>
   )}
 

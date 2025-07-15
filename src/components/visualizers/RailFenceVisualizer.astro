@@ -1,0 +1,268 @@
+---
+// src/components/visualizers/RailFenceVisualizer.astro
+import VisualizerLayout from './VisualizerLayout.astro';
+const uniqueId = `rail-vis-${Math.random().toString(36).slice(2)}`;
+---
+
+<VisualizerLayout title="Rail Fence Cipher Visualizer" uniqueId={uniqueId}>
+    <!-- The HTML slots do not need any changes -->
+    <div slot="controls" class="control-group">
+        <label for={`plaintext-${uniqueId}`}>Enter Text:</label>
+        <input type="text" id={`plaintext-${uniqueId}`} value="WEAREDISCOVEREDFLEEATONCE">
+    </div>
+    <div slot="controls" class="control-group">
+        <label for={`rails-${uniqueId}`}>Number of Rails:</label>
+        <input type="number" id={`rails-${uniqueId}`} value="3" min="2">
+    </div>
+    <div slot="controls" class="control-group">
+        <label for={`speed-${uniqueId}`}>Speed:</label>
+        <div class="speed-controls">
+            <input type="range" id={`speed-${uniqueId}`} min="1" max="10" value="5">
+            <span class="speed-display">5</span>
+        </div>
+    </div>
+    <div slot="actions">
+        <button class="encrypt-btn">🔒 Encrypt</button>
+        <button class="decrypt-btn">🔓 Decrypt</button>
+        <button class="reset-btn">↻ Reset</button>
+    </div>
+    <div slot="visualization-body" class="scrolling-visualization-panel">
+        <div class="rail-grid-vis"></div>
+    </div>
+    <span slot="text-display">WEAREDISCOVEREDFLEEATONCE</span>
+
+    <!-- THE SCRIPT WITH THE FINAL BUG FIX -->
+    <script slot="script" is:inline define:vars={{ containerId: uniqueId }}>
+        function initializeRailFenceVisualizer(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const elements = {
+                plaintextInput: container.querySelector(`#plaintext-${containerId}`),
+                railsInput: container.querySelector(`#rails-${containerId}`),
+                speedInput: container.querySelector(`#speed-${containerId}`),
+                speedDisplay: container.querySelector('.speed-display'),
+                encryptBtn: container.querySelector('.encrypt-btn'),
+                decryptBtn: container.querySelector('.decrypt-btn'),
+                resetBtn: container.querySelector('.reset-btn'),
+                stepInfo: container.querySelector('.step-info'),
+                textDisplay: container.querySelector('.text-display'),
+                progressFill: container.querySelector('.progress-fill'),
+                visContainer: container.querySelector('.rail-grid-vis')
+            };
+            
+            new RailFenceVisualizer(elements);
+        }
+
+        class RailFenceVisualizer {
+            constructor(elements) {
+                // --- THIS IS THE SINGLE LINE THAT FIXES THE CRASH ---
+                this.elements = elements; 
+                
+                this.isAnimating = false;
+                this.animationSpeed = 1000;
+                
+                this.setupEventListeners();
+                this.createVisualization();
+            }
+
+            // The rest of the file is now guaranteed to work because `this.elements` is correctly defined.
+            setupEventListeners() {
+                this.elements.plaintextInput.addEventListener('input', () => this.createVisualization());
+                this.elements.railsInput.addEventListener('input', () => this.createVisualization());
+                this.elements.speedInput.addEventListener('input', () => this.updateSpeedDisplay());
+                this.elements.encryptBtn.addEventListener('click', () => this.startAnimation('encrypt'));
+                this.elements.decryptBtn.addEventListener('click', () => this.startAnimation('decrypt'));
+                this.elements.resetBtn.addEventListener('click', () => this.reset());
+            }
+
+            updateSpeedDisplay() {
+                this.elements.speedDisplay.textContent = this.elements.speedInput.value;
+                this.animationSpeed = 1100 - (parseInt(this.elements.speedInput.value) * 100);
+            }
+            
+            getFence(text, numRails) {
+                let fence = Array(numRails).fill().map(() => []);
+                if (numRails <= 1) { 
+                    fence[0] = text.split('');
+                    return fence;
+                }
+                let rail = 0;
+                let direction = 1;
+                for (const char of text) {
+                    fence[rail].push(char);
+                    rail += direction;
+                    if (rail === 0 || rail === numRails - 1) direction *= -1;
+                }
+                return fence;
+            }
+
+            createVisualization() {
+                d3.select(this.elements.visContainer).selectAll("*").remove();
+                const text = this.elements.plaintextInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                const numRails = parseInt(this.elements.railsInput.value) || 0;
+
+                if (!text || numRails < 2) {
+                    this.elements.stepInfo.textContent = "Enter text and at least 2 rails.";
+                    return;
+                }
+                this.elements.stepInfo.textContent = "Grid ready. Click a button to start.";
+                this.elements.textDisplay.textContent = text;
+
+                const textLength = text.length;
+                const cellSize = 40;
+                const svgWidth = textLength * cellSize;
+                const svgHeight = numRails * cellSize;
+                
+                const svg = d3.select(this.elements.visContainer)
+                    .append("svg")
+                    .attr("width", svgWidth)
+                    .attr("height", svgHeight);
+
+                let rail = 0;
+                let direction = 1;
+
+                if (numRails > 1) {
+                    for(let i=0; i < textLength - 1; i++) {
+                        let nextRail = rail + direction;
+                        svg.append("line").attr("id", `line-${i}`).attr("x1", i * cellSize + cellSize / 2).attr("y1", rail * cellSize + cellSize / 2).attr("x2", (i + 1) * cellSize + cellSize / 2).attr("y2", nextRail * cellSize + cellSize / 2);
+                        rail = nextRail;
+                        if(rail === 0 || rail === numRails - 1) direction *= -1;
+                    }
+                }
+
+                for (let r = 0; r < numRails; r++) {
+                    for (let c = 0; c < textLength; c++) {
+                        svg.append("rect").attr("id", `rect-${r}-${c}`).attr("x", c * cellSize).attr("y", r * cellSize).attr("width", cellSize).attr("height", cellSize);
+                        svg.append("text").attr("id", `text-${r}-${c}`).attr("x", c * cellSize + cellSize / 2).attr("y", r * cellSize + cellSize / 2 + 7).attr("text-anchor", "middle");
+                    }
+                }
+            }
+            
+            async startAnimation(mode) {
+                if(this.isAnimating) return;
+                const text = this.elements.plaintextInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                const numRails = parseInt(this.elements.railsInput.value) || 0;
+                if (!text || numRails < 2) return;
+
+                this.isAnimating = true;
+                this.setControlsState(false);
+                this.updateProgress(0);
+                this.createVisualization(); 
+                this.elements.textDisplay.textContent = '';
+
+                if (mode === 'encrypt') {
+                    await this.animateEncryption(text, numRails);
+                } else {
+                    await this.animateDecryption(text, numRails);
+                }
+
+                this.isAnimating = false;
+                this.setControlsState(true);
+            }
+
+            async animateEncryption(text, numRails) {
+                this.elements.stepInfo.textContent = "Placing letters on the fence...";
+                let rail = 0, direction = 1;
+                
+                for(let i=0; i<text.length; i++) {
+                    d3.select(this.elements.visContainer).select(`#text-${rail}-${i}`).text(text[i]).classed("visible", true);
+                    d3.select(this.elements.visContainer).select(`#line-${i-1}`).classed("highlight", false);
+                    if(numRails > 1) d3.select(this.elements.visContainer).select(`#line-${i}`).classed("highlight", true);
+                    await this.sleep(this.animationSpeed);
+                    this.updateProgress((i + 1) / (text.length * 2) * 100);
+                    if (numRails > 1) {
+                        rail += direction;
+                        if(rail === 0 || rail === numRails - 1) direction *= -1;
+                    }
+                }
+                d3.select(this.elements.visContainer).selectAll("line").classed("highlight", false);
+
+                this.elements.stepInfo.textContent = "Reading ciphertext from the fence...";
+                let resultText = '';
+                for(let r=0; r<numRails; r++) {
+                    for(let c=0; c<text.length; c++) {
+                        const cellText = d3.select(this.elements.visContainer).select(`#text-${r}-${c}`).text();
+                        if (cellText) {
+                            d3.select(this.elements.visContainer).select(`#rect-${r}-${c}`).classed("highlight-read", true);
+                            d3.select(this.elements.visContainer).select(`#text-${r}-${c}`).classed("highlight-read", true);
+                            resultText += cellText;
+                            this.elements.textDisplay.textContent = resultText;
+                            await this.sleep(this.animationSpeed / 2);
+                        }
+                    }
+                }
+                this.elements.stepInfo.innerHTML = `Encryption Complete! Result: <b style="color: #51cf66;">${resultText}</b>`;
+            }
+
+            async animateDecryption(text, numRails) {
+                this.elements.stepInfo.textContent = "Filling the fence with ciphertext...";
+                let fence = Array(numRails).fill().map(() => Array(text.length).fill(null));
+                let rail = 0, direction = 1;
+                for(let i=0; i < text.length; i++) {
+                    fence[rail][i] = '*';
+                    if (numRails > 1) {
+                        rail += direction;
+                        if(rail === 0 || rail === numRails - 1) direction *= -1;
+                    }
+                }
+                
+                let textIndex = 0;
+                for(let r=0; r<numRails; r++) {
+                    for(let c=0; c<text.length; c++) {
+                        if(fence[r][c] === '*') {
+                            fence[r][c] = text[textIndex];
+                            d3.select(this.elements.visContainer).select(`#text-${r}-${c}`).text(text[textIndex]).classed("visible", true);
+                            textIndex++;
+                        }
+                    }
+                }
+
+                this.elements.stepInfo.textContent = "Reading the plaintext along the path...";
+                let resultText = '';
+                rail = 0, direction = 1;
+                for(let i=0; i<text.length; i++) {
+                    const char = fence[rail][i];
+                    resultText += char;
+                    this.elements.textDisplay.textContent = resultText;
+                    d3.select(this.elements.visContainer).select(`#rect-${rail}-${i}`).classed("highlight-read", true);
+                    d3.select(this.elements.visContainer).select(`#text-${rail}-${i}`).classed("highlight-read", true);
+                    if(numRails > 1) {
+                        d3.select(this.elements.visContainer).select(`#line-${i-1}`).classed("highlight", false);
+                        d3.select(this.elements.visContainer).select(`#line-${i}`).classed("highlight", true);
+                    }
+                    await this.sleep(this.animationSpeed);
+                    this.updateProgress((text.length + resultText.length) / (text.length * 2) * 100);
+
+                    if (numRails > 1) {
+                        rail += direction;
+                        if(rail === 0 || rail === numRails - 1) direction *= -1;
+                    }
+                }
+                d3.select(this.elements.visContainer).selectAll("line").classed("highlight", false);
+                this.elements.stepInfo.innerHTML = `Decryption Complete! Result: <b style="color: #51cf66;">${resultText}</b>`;
+            }
+
+            updateProgress(percentage) { this.elements.progressFill.style.width = percentage + '%'; }
+            setControlsState(enabled) {
+                this.elements.encryptBtn.disabled = !enabled;
+                this.elements.decryptBtn.disabled = !enabled;
+                this.elements.resetBtn.disabled = !enabled;
+                this.elements.plaintextInput.disabled = !enabled;
+                this.elements.railsInput.disabled = !enabled;
+            }
+            sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+            reset() {
+                this.isAnimating = false;
+                this.setControlsState(true);
+                this.updateProgress(0);
+                this.elements.plaintextInput.value = "WEAREDISCOVEREDFLEEATONCE";
+                this.elements.railsInput.value = 3;
+                this.createVisualization();
+            }
+        }
+        
+        initializeRailFenceVisualizer(containerId);
+    </script>
+</VisualizerLayout>

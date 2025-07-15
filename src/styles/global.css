@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.prose a {
+  overflow-wrap: break-word;
+  word-wrap: break-word; /* Older browser support */
+  word-break: break-word; /* Even more aggressive, ensures it breaks */
+}

@@ -1,0 +1,306 @@
+---
+// src/components/visualizers/HillVisualizer.astro
+import VisualizerLayout from './VisualizerLayout.astro';
+
+// Create the unique ID for this instance
+const uniqueId = `hill-vis-${Math.random().toString(36).slice(2)}`;
+---
+
+<!-- Use the master layout component, passing in the title and unique ID -->
+<VisualizerLayout title="Hill Cipher Visualizer" uniqueId={uniqueId}>
+
+    <!-- 1. This content goes into the "controls" slot of the layout -->
+    <div slot="controls" class="control-group">
+        <label for={`plaintext-${uniqueId}`}>Enter Text:</label>
+        <input type="text" id={`plaintext-${uniqueId}`} value="ATTACK">
+    </div>
+    <div slot="controls" class="control-group">
+        <label>Key Matrix (2x2):</label>
+        <div class="matrix-inputs">
+            <input type="number" id={`k00-${uniqueId}`} min="0" max="25" value="3">
+            <input type="number" id={`k01-${uniqueId}`} min="0" max="25" value="3">
+            <input type="number" id={`k10-${uniqueId}`} min="0" max="25" value="2">
+            <input type="number" id={`k11-${uniqueId}`} min="0" max="25" value="5">
+        </div>
+    </div>
+    <div slot="controls" class="control-group">
+        <label for={`speed-${uniqueId}`}>Speed:</label>
+        <div class="speed-controls">
+            <input type="range" id={`speed-${uniqueId}`} min="1" max="10" value="5">
+            <span class="speed-display">5</span>
+        </div>
+    </div>
+
+    <!-- 2. This content goes into the "validation" slot -->
+    <div slot="validation" class="matrix-validation"></div>
+
+    <!-- 3. This content goes into the "actions" slot -->
+    <div slot="actions">
+        <button class="encrypt-btn">🔒 Encrypt</button>
+        <button class="decrypt-btn">🔓 Decrypt</button>
+        <button class="reset-btn">↻ Reset</button>
+    </div>
+
+    <!-- 4. This content goes into the "visualization-panel" slot -->
+    <div slot="visualization-panel" class="matrix-vis"></div>
+
+    <!-- 5. This content goes into the "text-display" slot -->
+    <span slot="text-display">ATTACK</span>
+    
+    <!-- 6. The unique script for this visualizer goes into the "script" slot -->
+<script slot="script" is:inline define:vars={{ containerId: uniqueId }}>
+        function initializeHillVisualizer(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            // Find all elements relative to this specific container
+            const elements = {
+                plaintextInput: container.querySelector(`#plaintext-${containerId}`),
+                speedInput: container.querySelector(`#speed-${containerId}`),
+                speedDisplay: container.querySelector('.speed-display'),
+                encryptBtn: container.querySelector('.encrypt-btn'),
+                decryptBtn: container.querySelector('.decrypt-btn'),
+                resetBtn: container.querySelector('.reset-btn'),
+                stepInfo: container.querySelector('.step-info'),
+                textDisplay: container.querySelector('.text-display'), 
+                progressFill: container.querySelector('.progress-fill'),
+                matrixVisContainer: container.querySelector('.matrix-vis'),
+                matrixValidationDisplay: container.querySelector('.matrix-validation'),
+                matrixInputs: [
+                    [container.querySelector(`#k00-${containerId}`), container.querySelector(`#k01-${containerId}`)],
+                    [container.querySelector(`#k10-${containerId}`), container.querySelector(`#k11-${containerId}`)]
+                ]
+            };
+            
+            new HillCipherVisualizer(elements);
+        }
+
+        class HillCipherVisualizer {
+            constructor(elements) {
+                this.elements = elements;
+                this.alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                this.isAnimating = false;
+                this.animationSpeed = 1500;
+                
+                this.setupEventListeners();
+                this.updateDisplay();
+                this.validateKeyMatrix();
+            }
+
+            // ... Paste your entire, unchanged Hill Cipher JavaScript logic here ...
+            // (setupEventListeners, updateDisplay, getKeyMatrix, validateKeyMatrix, etc.)
+            setupEventListeners() {
+                this.elements.plaintextInput.addEventListener('input', () => this.updateDisplay());
+                this.elements.speedInput.addEventListener('input', () => this.updateSpeedDisplay());
+                this.elements.matrixInputs.flat().forEach(input => {
+                    if(input) input.addEventListener('input', () => this.validateKeyMatrix());
+                });
+
+                this.elements.encryptBtn.addEventListener('click', () => this.startAnimation('encrypt'));
+                this.elements.decryptBtn.addEventListener('click', () => this.startAnimation('decrypt'));
+                this.elements.resetBtn.addEventListener('click', () => this.reset());
+            }
+
+            updateDisplay() {
+                let text = this.elements.plaintextInput.value.toUpperCase().replace(/[^A-Z]/g, '');
+                this.elements.plaintextInput.value = text;
+                this.elements.textDisplay.textContent = text;
+            }
+            
+            updateSpeedDisplay() {
+                this.elements.speedDisplay.textContent = this.elements.speedInput.value;
+                this.animationSpeed = 2100 - (parseInt(this.elements.speedInput.value) * 200);
+            }
+            
+            getKeyMatrix() {
+                return this.elements.matrixInputs.map(row => row.map(input => parseInt(input.value) || 0));
+            }
+
+            mod(n, m) { return ((n % m) + m) % m; }
+            gcd(a, b) { return b === 0 ? a : this.gcd(b, a % b); }
+
+            modInverse(a, m) {
+                a = this.mod(a, m);
+                for (let x = 1; x < m; x++) {
+                    if (this.mod(a * x, m) === 1) return x;
+                }
+                return null;
+            }
+            
+            getDeterminant(matrix) {
+                const det = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+                return this.mod(det, 26);
+            }
+
+            validateKeyMatrix() {
+                this.createMatrixVisualization();
+                const matrix = this.getKeyMatrix();
+                const det = this.getDeterminant(matrix);
+                
+                if (this.gcd(det, 26) !== 1) {
+                    const reason = (det === 0) ? "is 0" : (det % 2 === 0) ? "is even" : "is a multiple of 13";
+                    this.elements.matrixValidationDisplay.textContent = `Det: ${det} (${reason}). INVALID for decryption.`;
+                    this.elements.matrixValidationDisplay.className = 'matrix-validation invalid';
+                    this.elements.decryptBtn.disabled = true;
+                    return false;
+                } else {
+                    this.elements.matrixValidationDisplay.textContent = `Det: ${det}. VALID for decryption.`;
+                    this.elements.matrixValidationDisplay.className = 'matrix-validation valid';
+                    if (!this.isAnimating) this.elements.decryptBtn.disabled = false;
+                    return true;
+                }
+            }
+
+            getMatrixInverse(matrix) {
+                const det = this.getDeterminant(matrix);
+                const invDet = this.modInverse(det, 26);
+                if (invDet === null) return null;
+
+                const adjugate = [
+                    [this.mod(matrix[1][1], 26), this.mod(-matrix[0][1], 26)],
+                    [this.mod(-matrix[1][0], 26), this.mod(matrix[0][0], 26)]
+                ];
+
+                return adjugate.map(row => row.map(val => this.mod(val * invDet, 26)));
+            }
+            
+            multiplyMatrixVector(matrix, vector) {
+                const c1 = this.mod(matrix[0][0] * vector[0] + matrix[0][1] * vector[1], 26);
+                const c2 = this.mod(matrix[1][0] * vector[0] + matrix[1][1] * vector[1], 26);
+                return [c1, c2];
+            }
+
+            prepareText(text) {
+                if (text.length % 2 !== 0) {
+                    text += 'X';
+                }
+                return text;
+            }
+
+            createMatrixVisualization() {
+                const svg = d3.select(this.elements.matrixVisContainer).selectAll("svg").data([null]);
+                const svgEnter = svg.enter().append("svg").attr("width", 120).attr("height", 60);
+
+                const matrix = this.getKeyMatrix();
+                const cellSize = 50;
+                const gap = 10;
+
+                matrix.forEach((row, i) => {
+                    row.forEach((val, j) => {
+                        svgEnter.append("rect").attr("id", `rect-${i}-${j}`).attr("x", j * (cellSize + gap)).attr("y", i * (cellSize + gap)).attr("width", cellSize).attr("height", cellSize).attr("rx", 8);
+                        svgEnter.append("text").attr("id", `text-${i}-${j}`).attr("x", j * (cellSize + gap) + cellSize / 2).attr("y", i * (cellSize + gap) + cellSize / 2 + 7).attr("text-anchor", "middle");
+                        svg.merge(svgEnter).select(`#text-${i}-${j}`).text(val);
+                    });
+                });
+            }
+
+            async startAnimation(mode) {
+                if (this.isAnimating) return;
+                
+                try {
+                    this.updateDisplay();
+                    const initialText = this.elements.plaintextInput.value;
+                    if (!initialText) {
+                        this.elements.stepInfo.textContent = "Please enter some text to process.";
+                        return;
+                    }
+
+                    if (mode === 'decrypt' && !this.validateKeyMatrix()) {
+                        this.elements.stepInfo.textContent = "Cannot decrypt: The key matrix is not invertible.";
+                        return;
+                    }
+                    
+                    this.isAnimating = true;
+                    this.setControlsState(false);
+                    this.updateProgress(0);
+
+                    const text = this.prepareText(initialText);
+                    const keyMatrix = this.getKeyMatrix();
+                    const matrixToUse = mode === 'encrypt' ? keyMatrix : this.getMatrixInverse(keyMatrix);
+                    
+                    if (!matrixToUse) {
+                         throw new Error("Matrix to use is null. This should not happen if validation passed.");
+                    }
+
+                    let resultText = '';
+                    this.elements.stepInfo.textContent = `Starting ${mode}ion...`;
+                    
+                    for (let i = 0; i < text.length; i += 2) {
+                        const digraph = text.substring(i, i + 2);
+                        const vector = [this.alphabet.indexOf(digraph[0]), this.alphabet.indexOf(digraph[1])];
+                        const resultVector = this.multiplyMatrixVector(matrixToUse, vector);
+                        const resultDigraph = this.alphabet[resultVector[0]] + this.alphabet[resultVector[1]];
+                        
+                        await this.animateDigraph(text, digraph, vector, resultDigraph, resultText, mode);
+                        
+                        resultText += resultDigraph;
+                        this.updateProgress(((i + 2) / text.length) * 100);
+                    }
+
+                    this.elements.stepInfo.innerHTML = `${mode.charAt(0).toUpperCase() + mode.slice(1)}ion Complete! Final Result: <b style="color: #51cf66;">${resultText}</b>`;
+                    this.elements.textDisplay.textContent = resultText;
+                } catch (error) {
+                    this.elements.stepInfo.textContent = "An unexpected error occurred. Please check the console.";
+                    console.error("An error occurred during animation:", error);
+                } finally {
+                    this.isAnimating = false;
+                    this.setControlsState(true);
+ax
+                }
+            }
+            
+            async animateDigraph(fullText, digraph, vector, resultDigraph, processedText, mode) {
+                const pos = processedText.length;
+                this.elements.textDisplay.innerHTML = `<span style="color:#a5d8ff;">${processedText}</span>` +
+                                             `<span style="background:rgba(255,107,107,0.5);">${digraph}</span>` +
+                                             `<span>${fullText.substring(pos + 2)}</span>`;
+                this.elements.stepInfo.textContent = `Processing digraph: '${digraph}' ([${vector.join(', ')}])`;
+                await this.sleep(this.animationSpeed / 2);
+
+                d3.select(this.elements.matrixVisContainer).selectAll("rect, text").classed("highlight", true);
+                const matrixName = mode === 'encrypt' ? 'Key Matrix' : 'Inverse Matrix';
+                this.elements.stepInfo.innerHTML = `Multiplying vector by the ${matrixName}...`;
+                await this.sleep(this.animationSpeed);
+
+                d3.select(this.elements.matrixVisContainer).selectAll("rect, text").classed("highlight", false);
+                this.elements.textDisplay.innerHTML = `<span style="color:#51cf66;">${processedText}</span>` +
+                                             `<span style="background:rgba(81,207,102,0.5);">${resultDigraph}</span>`;
+                const resultVector = [this.alphabet.indexOf(resultDigraph[0]), this.alphabet.indexOf(resultDigraph[1])];
+                this.elements.stepInfo.innerHTML = `Result: '<b>${resultDigraph}</b>' ([${resultVector.join(', ')}])`;
+                await this.sleep(this.animationSpeed / 2);
+            }
+
+            updateProgress(percentage) {
+                this.elements.progressFill.style.width = percentage + '%';
+            }
+
+            setControlsState(enabled) {
+                this.elements.encryptBtn.disabled = !enabled;
+                this.elements.resetBtn.disabled = !enabled;
+                
+                if(enabled) { this.validateKeyMatrix(); }
+                else { this.elements.decryptBtn.disabled = true; }
+
+                this.elements.plaintextInput.disabled = !enabled;
+                this.elements.matrixInputs.flat().forEach(input => {
+                    if(input) input.disabled = !enabled;
+                });
+            }
+
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            reset() {
+                this.isAnimating = false;
+                this.setControlsState(true);
+                this.updateProgress(0);
+                this.updateDisplay();
+                this.elements.stepInfo.textContent = "Enter text and a valid key matrix to begin.";
+                d3.select(this.elements.matrixVisContainer).selectAll("rect, text").attr("class", "");
+            }
+        }
+
+        initializeHillVisualizer(containerId);
+    </script>
+</VisualizerLayout>

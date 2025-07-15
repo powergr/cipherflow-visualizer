@@ -1,0 +1,295 @@
+---
+// src/components/visualizers/PlayfairVisualizer.astro
+import VisualizerLayout from './VisualizerLayout.astro';
+
+// Create the unique ID for this instance
+const uniqueId = `playfair-vis-${Math.random().toString(36).slice(2)}`;
+---
+
+<!-- Use the master layout component, passing in the title and unique ID -->
+<VisualizerLayout title="Playfair Cipher Visualizer" uniqueId={uniqueId}>
+
+    <!-- 1. The unique HTML for the controls -->
+    <div slot="controls" class="control-group">
+        <label for={`plaintext-${uniqueId}`}>Enter Text:</label>
+        <input type="text" id={`plaintext-${uniqueId}`} value="HELLOWORLD">
+    </div>
+    <div slot="controls" class="control-group">
+        <label for={`key-${uniqueId}`}>Keyword:</label>
+        <input type="text" id={`key-${uniqueId}`} value="PLAYFAIR">
+    </div>
+    <div slot="controls" class="control-group">
+        <label for={`speed-${uniqueId}`}>Speed:</label>
+        <div class="speed-controls">
+            <input type="range" id={`speed-${uniqueId}`} min="1" max="10" value="5">
+            <span class="speed-display">5</span>
+        </div>
+    </div>
+
+    <!-- 2. The unique HTML for the action buttons -->
+    <div slot="actions">
+        <button class="encrypt-btn">🔒 Encrypt</button>
+        <button class="decrypt-btn">🔓 Decrypt</button>
+        <button class="reset-btn">↻ Reset</button>
+    </div>
+
+    <!-- 3. The unique HTML for the visualization panel -->
+    <div slot="visualization-panel" class="key-square-vis"></div>
+
+    <!-- 4. The unique HTML for the text display -->
+    <span slot="text-display">HELLOWORLD</span>
+    
+    <!-- 5. The unique script for this visualizer -->
+    <script slot="script" is:inline define:vars={{ containerId: uniqueId }}>
+        function initializePlayfairVisualizer(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const elements = {
+                plaintextInput: container.querySelector(`#plaintext-${containerId}`),
+                keyInput: container.querySelector(`#key-${containerId}`),
+                speedInput: container.querySelector(`#speed-${containerId}`),
+                speedDisplay: container.querySelector('.speed-display'),
+                encryptBtn: container.querySelector('.encrypt-btn'),
+                decryptBtn: container.querySelector('.decrypt-btn'),
+                resetBtn: container.querySelector('.reset-btn'),
+                stepInfo: container.querySelector('.step-info'),
+                textDisplay: container.querySelector('.text-display'), 
+                progressFill: container.querySelector('.progress-fill'),
+                visContainer: container.querySelector('.key-square-vis')
+            };
+            
+            new PlayfairCipherVisualizer(elements);
+        }
+
+        class PlayfairCipherVisualizer {
+            constructor(elements) {
+                this.elements = elements;
+                this.alphabet = 'ABCDEFGHIKLMNOPQRSTUVWXYZ'; // J is omitted
+                this.isAnimating = false;
+                this.animationSpeed = 1500;
+                
+                this.setupEventListeners();
+                this.updateDisplay();
+                this.createKeySquare();
+            }
+
+            setupEventListeners() {
+                this.elements.plaintextInput.addEventListener('input', () => this.updateDisplay());
+                this.elements.keyInput.addEventListener('input', () => this.createKeySquare());
+                this.elements.speedInput.addEventListener('input', () => this.updateSpeedDisplay());
+
+                this.elements.encryptBtn.addEventListener('click', () => this.startAnimation('encrypt'));
+                this.elements.decryptBtn.addEventListener('click', () => this.startAnimation('decrypt'));
+                this.elements.resetBtn.addEventListener('click', () => this.reset());
+            }
+
+            updateDisplay() {
+                let text = this.elements.plaintextInput.value.toUpperCase().replace(/[^A-Z]/g, '');
+                this.elements.plaintextInput.value = text;
+                this.elements.textDisplay.textContent = text;
+            }
+            
+            updateSpeedDisplay() {
+                this.elements.speedDisplay.textContent = this.elements.speedInput.value;
+                this.animationSpeed = 2100 - (parseInt(this.elements.speedInput.value) * 200);
+            }
+            
+            generateKeySquare(key) {
+                key = key.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+                let square = [];
+                let used = new Set();
+                for (const char of key) {
+                    if (!used.has(char)) {
+                        square.push(char);
+                        used.add(char);
+                    }
+                }
+                for (const char of this.alphabet) {
+                    if (!used.has(char)) {
+                        square.push(char);
+                    }
+                }
+                return square;
+            }
+
+            prepareText(text) {
+                let sanitized = text.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+                if (sanitized.length === 0) return [];
+                
+                let digraphs = [];
+                let i = 0;
+                while (i < sanitized.length) {
+                    let p1 = sanitized[i];
+                    
+                    if (i + 1 >= sanitized.length) {
+                        digraphs.push(p1 + 'X');
+                        break;
+                    }
+
+                    let p2 = sanitized[i+1];
+                    
+                    if (p1 === p2) {
+                        digraphs.push(p1 + 'X');
+                        i += 1; 
+                    } else {
+                        digraphs.push(p1 + p2);
+                        i += 2; 
+                    }
+                }
+                return digraphs;
+            }
+            
+            findPosition(square, char) {
+                const index = square.indexOf(char);
+                if (index === -1) return null;
+                return { row: Math.floor(index / 5), col: index % 5 };
+            }
+
+            applyPlayfairRules(digraph, square, mode) {
+                const p1 = this.findPosition(square, digraph[0]);
+                const p2 = this.findPosition(square, digraph[1]);
+                const shift = mode === 'encrypt' ? 1 : 4; 
+                let newP1, newP2;
+
+                if(p1.row === p2.row) {
+                    newP1 = { row: p1.row, col: (p1.col + shift) % 5 };
+                    newP2 = { row: p2.row, col: (p2.col + shift) % 5 };
+                } else if (p1.col === p2.col) {
+                    newP1 = { row: (p1.row + shift) % 5, col: p1.col };
+                    newP2 = { row: (p2.row + shift) % 5, col: p2.col };
+                } else {
+                    newP1 = { row: p1.row, col: p2.col };
+                    newP2 = { row: p2.row, col: p1.col };
+                }
+                
+                const resultDigraph = square[newP1.row * 5 + newP1.col] + square[newP2.row * 5 + newP2.col];
+                return { resultDigraph, p1, p2, newP1, newP2 };
+            }
+
+            createKeySquare() {
+                d3.select(this.elements.visContainer).selectAll("*").remove();
+                const svg = d3.select(this.elements.visContainer)
+                    .append("svg")
+                    .attr("width", 270)
+                    .attr("height", 270);
+
+                const key = this.elements.keyInput.value;
+                const square = this.generateKeySquare(key);
+                const cellSize = 50;
+                const gap = 4;
+
+                square.forEach((char, index) => {
+                    const row = Math.floor(index / 5);
+                    const col = index % 5;
+                    
+                    svg.append("rect").attr("x", col * (cellSize + gap)).attr("y", row * (cellSize + gap)).attr("width", cellSize).attr("height", cellSize).attr("rx", 8).attr("id", `rect-${row}-${col}`);
+                    svg.append("text").attr("x", col * (cellSize + gap) + cellSize / 2).attr("y", row * (cellSize + gap) + cellSize / 2 + 7).attr("text-anchor", "middle").attr("id", `text-${row}-${col}`).text(char);
+                });
+            }
+
+            async startAnimation(mode) {
+                if (this.isAnimating) return;
+                
+                this.updateDisplay();
+                const initialText = this.elements.plaintextInput.value;
+                if (!initialText) {
+                    this.elements.stepInfo.textContent = "Please enter some text to process.";
+                    return;
+                }
+                
+                this.isAnimating = true;
+                this.setControlsState(false);
+                this.updateProgress(0);
+
+                const digraphs = this.prepareText(initialText);
+                const key = this.elements.keyInput.value;
+                const square = this.generateKeySquare(key);
+                
+                let resultText = '';
+                this.elements.stepInfo.textContent = `Starting ${mode}ion...`;
+                this.elements.textDisplay.textContent = digraphs.join(' ');
+                
+                for (let i = 0; i < digraphs.length; i++) {
+                    const digraph = digraphs[i];
+                    
+                    const { resultDigraph, p1, p2, newP1, newP2 } = this.applyPlayfairRules(digraph, square, mode);
+
+                    await this.animateDigraph(digraph, resultDigraph, p1, p2, newP1, newP2, resultText, digraphs);
+                    
+                    resultText += resultDigraph;
+                    this.updateProgress(((i + 1) / digraphs.length) * 100);
+                }
+
+                this.elements.stepInfo.innerHTML = `${mode.charAt(0).toUpperCase() + mode.slice(1)}ion Complete! Final Result: <b style="color: #51cf66;">${resultText}</b>`;
+                this.elements.textDisplay.textContent = resultText;
+                this.isAnimating = false;
+                this.setControlsState(true);
+            }
+            
+            async animateDigraph(digraph, resultDigraph, p1, p2, newP1, newP2, processedText, allDigraphs) {
+                const vis = d3.select(this.elements.visContainer);
+                vis.selectAll("rect, text").attr("class", "");
+
+                const currentIndex = processedText.length / 2;
+                this.elements.textDisplay.innerHTML = allDigraphs.map((d, i) => {
+                    if (i < currentIndex) return `<span style="color:#51cf66;">${d}</span>`;
+                    if (i === currentIndex) return `<span style="background:rgba(255,107,107,0.5);">${d}</span>`;
+                    return `<span>${d}</span>`;
+                }).join(' ');
+                
+                vis.select(`#rect-${p1.row}-${p1.col}`).classed("highlight-1", true);
+                vis.select(`#text-${p1.row}-${p1.col}`).classed("highlight-1", true);
+                vis.select(`#rect-${p2.row}-${p2.col}`).classed("highlight-2", true);
+                vis.select(`#text-${p2.row}-${p2.col}`).classed("highlight-2", true);
+
+                let rule = '';
+                if (p1.row === p2.row) rule = "Same Row Rule";
+                else if (p1.col === p2.col) rule = "Same Column Rule";
+                else rule = "Rectangle Rule";
+                
+                this.elements.stepInfo.textContent = `Processing '${digraph}': ${rule}`;
+                await this.sleep(this.animationSpeed);
+                
+                vis.selectAll("rect, text").attr("class", "");
+
+                vis.select(`#rect-${newP1.row}-${newP1.col}`).classed("highlight-result", true);
+                vis.select(`#text-${newP1.row}-${newP1.col}`).classed("highlight-result", true);
+                vis.select(`#rect-${newP2.row}-${newP2.col}`).classed("highlight-result", true);
+                vis.select(`#text-${newP2.row}-${newP2.col}`).classed("highlight-result", true);
+
+                this.elements.stepInfo.innerHTML = `'${digraph}' → '<b>${resultDigraph}</b>'`;
+                await this.sleep(this.animationSpeed / 2);
+            }
+
+            updateProgress(percentage) {
+                this.elements.progressFill.style.width = percentage + '%';
+            }
+
+            setControlsState(enabled) {
+                this.elements.encryptBtn.disabled = !enabled;
+                this.elements.decryptBtn.disabled = !enabled;
+                this.elements.resetBtn.disabled = !enabled;
+                this.elements.plaintextInput.disabled = !enabled;
+                this.elements.keyInput.disabled = !enabled;
+            }
+
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            reset() {
+                this.isAnimating = false;
+                this.setControlsState(true);
+                this.updateProgress(0);
+                this.elements.keyInput.value = "PLAYFAIR";
+                this.elements.plaintextInput.value = "HELLOWORLD";
+                this.updateDisplay();
+                this.createKeySquare();
+                this.elements.stepInfo.textContent = "Enter text and a key to build the cipher square.";
+            }
+        }
+
+        initializePlayfairVisualizer(containerId);
+    </script>
+</VisualizerLayout>

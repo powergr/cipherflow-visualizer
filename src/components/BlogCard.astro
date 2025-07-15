@@ -55,10 +55,14 @@ const difficultyColors = {
     <!-- Badges -->
     <div class="flex items-center gap-3 mb-3">
       {post.data.category && (
-        <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full">
+        <a 
+          href=`${base}/categories/${post.data.category.toLowerCase().replace(/\s+/g, '-')}`
+          class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+        >
           {post.data.category}
-        </span>
+        </a>
       )}
+
       {post.data.difficulty && (
         <span class={`px-3 py-1 text-xs font-medium rounded-full ${difficultyColors[post.data.difficulty]}`}>
           {post.data.difficulty.charAt(0).toUpperCase() + post.data.difficulty.slice(1)}

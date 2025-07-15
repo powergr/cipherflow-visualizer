@@ -1,0 +1,374 @@
+---
+// src/components/visualizers/VisualizerLayout.astro
+
+export interface Props {
+    title: string;
+    uniqueId: string;
+}
+
+const { title, uniqueId } = Astro.props;
+---
+
+<div class="visualizer-container" id={uniqueId}>
+    <h1>🔐 {title}</h1>
+
+    <div class="controls">
+        <slot name="controls" />
+    </div>
+    
+    <div class="validation-area">
+        <slot name="validation" />
+    </div>
+
+    <div class="action-buttons">
+        <slot name="actions" />
+    </div>
+    
+    <div class="progress-bar">
+        <div class="progress-fill"></div>
+    </div>
+
+    <div class="visualization">
+        <div class="step-info">Enter text and click a button to start!</div>
+        <slot name="visualization-panel" />
+        <div class="text-display">
+            <slot name="text-display" />
+        </div>
+    </div>
+</div>
+
+<slot name="script" />
+
+
+{/* By adding `is:global`, all styles inside this block will correctly apply
+    to any HTML or components passed into the <slot> elements above. */}
+<style is:global>
+    .visualizer-container {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 2rem auto;
+        padding: 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .visualizer-container h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2.5em;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .visualizer-container .controls {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: center;
+    }
+    
+    .visualizer-container .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .visualizer-container label {
+        font-weight: bold;
+        font-size: 14px;
+    }
+    
+    .visualizer-container .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .visualizer-container .validation-area {
+        text-align: center;
+        min-height: 22px;
+        margin: 5px 0;
+    }
+
+    .visualizer-container .matrix-validation {
+        font-size: 14px;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    .visualizer-container .valid { color: #51cf66; }
+    .visualizer-container .invalid { color: #ff6b6b; }
+    
+    .visualizer-container input[type="text"],
+    .visualizer-container input[type="number"] {
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        background: rgba(255, 255, 255, 0.9);
+        color: #333;
+        text-align: center;
+    }
+    
+    .visualizer-container input[type="text"] {
+        width: 200px;
+    }
+    
+    .visualizer-container .matrix-inputs {
+        display: grid;
+        grid-template-columns: repeat(2, 50px);
+        gap: 10px;
+    }
+
+    .visualizer-container input[type="range"] {
+        width: 150px;
+    }
+    
+    .visualizer-container button {
+        padding: 12px 24px;
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: bold;
+    }
+    
+    .visualizer-container button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .visualizer-container button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        background: linear-gradient(45deg, #a0a0a0, #707070);
+    }
+    
+    .visualizer-container .visualization {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+        min-height: 350px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .visualizer-container .text-display {
+        font-family: 'Courier New', monospace;
+        font-size: 24px;
+        text-align: center;
+        margin: 20px 0;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        min-height: 60px;
+        width: 80%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        word-break: break-all;
+    }
+    
+    .visualizer-container .step-info {
+        text-align: center;
+        font-size: 18px;
+        margin: 15px 0;
+        min-height: 25px;
+    }
+    
+    .visualizer-container .speed-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .visualizer-container .shift-display,
+    .visualizer-container .speed-display {
+        font-size: 14px; /* Adjusted for consistency */
+        font-weight: bold;
+        color: #ffeb3b;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    .visualizer-container .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        margin: 10px 0;
+        overflow: hidden;
+    }
+    
+    .visualizer-container .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #51cf66, #40c057);
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    /* --- ADDED THIS SECTION --- */
+    /* These are the missing styles from CaesarVisualizer.astro */
+    .visualizer-container .alphabet-wheel {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 20px 0;
+    }
+    
+    .visualizer-container .letter-box {
+        width: 40px;
+        height: 40px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 2px;
+        font-weight: bold;
+        font-size: 18px;
+        background: rgba(255, 255, 255, 0.1);
+        transition: all 0.5s ease;
+    }
+    
+    .visualizer-container .letter-box.highlight {
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        border-color: #fff;
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.5);
+    }
+    
+    .visualizer-container .letter-box.result {
+        background: linear-gradient(45deg, #51cf66, #40c057);
+        border-color: #fff;
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(81, 207, 102, 0.5);
+    }
+
+    /* Styles for the D3 Matrix (from HillVisualizer) */
+    .visualizer-container .matrix-vis {
+        margin-top: 10px;
+    }
+
+    .visualizer-container .matrix-vis rect {
+         stroke: rgba(255, 255, 255, 0.3);
+         stroke-width: 2;
+         fill: rgba(255, 255, 255, 0.1);
+         transition: all 0.5s ease;
+    }
+
+    .visualizer-container .matrix-vis text {
+        fill: white;
+        font-size: 18px;
+        font-weight: bold;
+        transition: all 0.5s ease;
+    }
+    
+    .visualizer-container .matrix-vis rect.highlight, 
+    .visualizer-container .matrix-vis text.highlight {
+        fill: #ff6b6b;
+    }
+     /* --- ADDED THIS SECTION: Styles for PLAYFAIR & HILL CIPHER grids --- */
+    .visualizer-container .key-square-vis,
+    .visualizer-container .matrix-vis {
+        margin-top: 10px;
+    }
+
+    .visualizer-container .key-square-vis rect,
+    .visualizer-container .matrix-vis rect {
+         stroke: rgba(255, 255, 255, 0.3);
+         stroke-width: 2;
+         fill: rgba(255, 255, 255, 0.1);
+         transition: all 0.5s ease;
+    }
+
+    .visualizer-container .key-square-vis text,
+    .visualizer-container .matrix-vis text {
+        fill: white;
+        font-size: 18px;
+        font-weight: bold;
+        transition: all 0.5s ease;
+    }
+    
+    .visualizer-container .key-square-vis .highlight-1,
+    .visualizer-container .matrix-vis .highlight {
+        fill: #ff6b6b; /* Red/Orange Highlight */
+    }
+
+    .visualizer-container .key-square-vis .highlight-2 {
+        fill: #667eea; /* Blue Highlight */
+    }
+
+    .visualizer-container .key-square-vis .highlight-result {
+        fill: #51cf66; /* Green Highlight */
+    }
+     /* Styles for RAIL FENCE CIPHER grid */
+
+     .visualizer-container .rail-grid-container {
+        width: 100%;
+        overflow-x: auto;
+        display: flex;
+        justify-content: flex-start;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 20px;
+        margin: 10px 0;
+    }
+
+    .visualizer-container .rail-grid-vis {
+        width: 100%;
+        overflow-x: auto; /* Allows horizontal scrolling for long text */
+        display: flex;
+        justify-content: flex-start; /* Aligns grid to the left */
+        padding-bottom: 10px; /* Adds some space for the scrollbar */
+    }
+
+    .visualizer-container .rail-grid-vis rect {
+         stroke: rgba(255, 255, 255, 0.3);
+         stroke-width: 1.5;
+         fill: rgba(255, 255, 255, 0.05);
+         transition: all 0.5s ease;
+    }
+
+    .visualizer-container .rail-grid-vis text {
+        fill: white;
+        font-size: 18px;
+        font-weight: bold;
+        transition: all 0.5s ease;
+        opacity: 0; /* Text is invisible by default */
+    }
+    
+    .visualizer-container .rail-grid-vis text.visible { 
+        opacity: 1; /* Makes text appear */
+    }
+
+    /* Highlights for Rail Fence */
+    .visualizer-container .rail-grid-vis text.highlight, 
+    .visualizer-container .rail-grid-vis rect.highlight { 
+        fill: #ff6b6b; /* Red/Orange for writing/marking */
+    }
+
+    .visualizer-container .rail-grid-vis text.highlight-read, 
+    .visualizer-container .rail-grid-vis rect.highlight-read { 
+        fill: #51cf66; /* Green for reading */
+    }
+
+    .visualizer-container .rail-grid-vis line {
+        stroke: rgba(255, 255, 255, 0.2);
+        stroke-width: 2.5;
+        transition: all 0.5s ease;
+    }
+    .visualizer-container .rail-grid-vis line.highlight {
+        stroke: #ff6b6b; /* Red/Orange highlight for the path */
+        stroke-width: 4;
+    }
+</style>
