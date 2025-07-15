@@ -4,7 +4,7 @@ description: "Learn about one of the simplest and most widely known encryption t
 difficulty: "beginner"
 pubDate: 2025-07-07
 author: "Pashalis Laoutaris"
-category: "Basic Classic Symmetric Ciphers"
+category: "Basic Classic Symmetric"
 visualizer: "CaesarVisualizer"
 ---
 

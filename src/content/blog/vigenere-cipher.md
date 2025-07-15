@@ -4,7 +4,7 @@ description: "The Vigenère Cipher: A Journey Through History and Modern Applica
 difficulty: "beginner"
 pubDate: 2025-07-14
 author: "Pashalis Laoutaris"
-category: "Basic Classic Symmetric Ciphers"
+category: "Basic Classic Symmetric"
 visualizer: "VigenereVisualizer"
 ---
 ## The Vigenère Cipher: A Journey Through History and Modern Applications
