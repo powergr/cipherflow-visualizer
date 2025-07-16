@@ -13,7 +13,14 @@ The Caesar cipher, a simple substitution cipher used by Julius Caesar himself, s
 
 Below, we present three scripts, each accompanied by its description and code, to demonstrate how to crack the Caesar cipher using a brute-force approach combined with pattern recognition. The scripts progress from a comprehensive implementation with detailed output to a concise masterpiece that still gets the job done.
 
----
+## Table of Contents
+
+- [The Extended Caesar Cipher Breaker](#the-extended-caesar-cipher-breaker)
+- [The 10-Line Caesar Cipher Breaker](#the-10-line-caesar-cipher-breaker)
+- [The 5-Line Interactive Caesar Cipher Breaker](#the-5-line-interactive-caesar-cipher-breaker)
+- [The Lesson: Algorithmic Elegance](#the-lesson-algorithmic-elegance)
+- [Conclusion](#conclusion)
+- [References for Caesar Cipher Breaker](#references-for-caesar-cipher-breaker)
 
 ## The Extended Caesar Cipher Breaker
 

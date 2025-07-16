@@ -14,6 +14,18 @@ visualizer: "CaesarVisualizer"
 
 In the vast landscape of cryptography, few methods are as historically significant and educationally valuable as the Caesar cipher. This ancient encryption technique, with its elegant simplicity and rich historical background, continues to serve as a fundamental building block for understanding modern cryptographic concepts. Whether you're a student taking your first steps into the world of cybersecurity or an educator looking to illustrate the evolution of secret communication, the Caesar cipher offers a perfect starting point for exploring the fascinating world of encryption.
 
+## Table of Contents
+
+- [History and Origins](#history-and-origins)
+- [Purpose and Function](#purpose-and-function)
+- [How the Caesar Cipher Works](#how-the-caesar-cipher-works)
+- [Pros and Cons Analysis](#pros-and-cons-analysis)
+- [Modern Relevance and Applications](#modern-relevance-and-applications)
+- [Cryptanalysis and Breaking the Caesar Cipher](#cryptanalysis-and-breaking-the-caesar-cipher)
+- [The Evolution Beyond Caesar](#the-evolution-beyond-caesar)
+- [Conclusion](#conclusion)
+- [References](#references)
+
 ## History and Origins
 
 The Caesar cipher derives its name from one of history's most famous military leaders: Julius Caesar. Named after Julius Caesar, who reportedly used it to protect his military communications, this technique involves shifting the letters of the alphabet by a fixed number of places. Historical accounts, particularly from the writings of Suetonius, suggest that Caesar employed this method around 50 BCE to encode sensitive military correspondence during his campaigns in Gaul.

@@ -16,6 +16,19 @@ The Hill cipher represents a fascinating intersection of mathematics and cryptog
 
 Invented by mathematician Lester S. Hill in 1929, this cipher introduced the power of linear algebra to cryptography, demonstrating how mathematical structures could be systematically applied to secret communication. For students of mathematics, computer science, and cryptography, the Hill cipher offers a perfect bridge between theoretical linear algebra and practical applications in information security.
 
+## Table of Contents
+
+- [Historical Background](#historical-background)
+- [Mathematical Foundations](#mathematical-foundations)
+- [How the Hill Cipher Works](#how-the-hill-cipher-works)
+- [Advantages and Disadvantages](#advantages-and-disadvantages)
+- [Cryptanalysis and Security](#cryptanalysis-and-security)
+- [Modern Relevance and Educational Applications](#modern-relevance-and-educational-applications)
+- [The Mathematical Legacy](#the-mathematical-legacy)
+- [Implementation Considerations](#implementation-considerations)
+- [Conclusion](#conclusion)
+- [References](#references)
+
 ## Historical Background
 
 ### The Inventor: Lester S. Hill
