@@ -143,5 +143,24 @@ const {
       });
     });
     </script>
+      <script>
+      function openExternalLinksInNewTab() {
+        const allLinks = document.querySelectorAll('a');
+        const currentHost = window.location.hostname;
+
+        allLinks.forEach(link => {
+          // Check if the link has a hostname and it's different from the current site's host
+          // This also correctly ignores links like mailto: and tel:
+          if (link.hostname && link.hostname !== currentHost) {
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+          }
+        });
+      }
+      
+      // Run the function after the page content has loaded
+      document.addEventListener('DOMContentLoaded', openExternalLinksInNewTab);
+    </script>
+
   </body>
 </html>
