@@ -11,6 +11,7 @@ import MD5Visualizer from '../../components/visualizers/MD5Visualizer.astro';
 import SHA1Visualizer from '../../components/visualizers/SHA1Visualizer.astro';
 import SHA2Visualizer from '../../components/visualizers/SHA2Visualizer.astro';
 import SHA3Visualizer from '../../components/visualizers/SHA3Visualizer.astro';
+import Blake3Visualizer from '../../components/visualizers/Blake3Visualizer.astro';
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection('blog');
@@ -163,6 +164,15 @@ const socialImageUrl = socialImage || image || '/images/default-blog-image.jpg';
         Interactive SHA-3 Hash Visualizer
       </h2>
       <SHA3Visualizer />
+    </div>
+  )}
+
+               {entry.data.visualizer === 'Blake3Visualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive BLAKE 3 Hash Visualizer
+      </h2>
+      <Blake3Visualizer />
     </div>
   )}
 
