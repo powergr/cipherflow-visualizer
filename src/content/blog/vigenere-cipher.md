@@ -15,6 +15,34 @@ visualizer: "VigenereVisualizer"
 
 The Vigenère cipher stands as one of the most significant achievements in classical cryptography, representing a major leap forward from simple substitution ciphers. Often called "le chiffre indéchiffrable," which means "the indecipherable cipher," this polyalphabetic cipher dominated secure communication for centuries. Despite its eventual defeat by mathematical analysis, the Vigenère cipher remains an essential educational tool for understanding the principles of cryptography and continues to fascinate students, historians, and cybersecurity professionals alike.
 
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Historical Background](#historical-background)
+  - [The True Origins](#the-true-origins)
+  - [The Real Inventor: Giovan Battista Bellaso](#the-real-inventor-giovan-battista-bellaso)
+  - [Blaise de Vigenère's Contribution](#blaise-de-vigenères-contribution)
+  - [The Polyalphabetic Revolution](#the-polyalphabetic-revolution)
+- [How the Vigenère Cipher Works](#how-the-vigenère-cipher-works)
+  - [The Basic Mechanism](#the-basic-mechanism)
+  - [The Vigenère Square](#the-vigenère-square)
+  - [Step-by-Step Process](#step-by-step-process)
+  - [Example Encryption](#example-encryption)
+- [Advantages and Disadvantages](#advantages-and-disadvantages)
+- [The Cipher's Downfall](#the-ciphers-downfall)
+  - [Charles Babbage's Breakthrough](#charles-babbages-breakthrough)
+  - [The Kasiski Examination](#the-kasiski-examination)
+- [Modern Applications and Relevance](#modern-applications-and-relevance)
+  - [Educational Purposes](#educational-purposes)
+  - [Programming Exercises](#programming-exercises)
+  - [Research Applications](#research-applications)
+  - [Historical Analysis](#historical-analysis)
+- [Latest Developments and News](#latest-developments-and-news)
+  - [2024-2025 Developments](#2024-2025-developments)
+  - [Contemporary Relevance](#contemporary-relevance)
+- [Conclusion](#conclusion)
+- [References](#references)
+
 ## Historical Background
 
 ### The True Origins

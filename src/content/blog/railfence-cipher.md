@@ -17,6 +17,36 @@ The Rail Fence Cipher, also known as the zigzag cipher, is a classical transposi
 
 In this comprehensive guide, we'll explore the fascinating history of this cipher, understand its mechanisms, analyze its strengths and weaknesses, and examine its relevance in today's digital world.
 
+## Table of Contents
+
+- [The Rail Fence Cipher: A Complete Educational Guide](#the-rail-fence-cipher-a-complete-educational-guide)
+- [Introduction](#introduction)
+- [History of the Rail Fence Cipher](#history-of-the-rail-fence-cipher)
+  - [Ancient Origins](#ancient-origins)
+  - [Classical Development](#classical-development)
+  - [Modern Recognition](#modern-recognition)
+- [How the Rail Fence Cipher Works](#how-the-rail-fence-cipher-works)
+  - [The Basic Concept](#the-basic-concept)
+  - [Encryption Process](#encryption-process)
+  - [Example Walkthrough](#example-walkthrough)
+  - [Decryption Process](#decryption-process)
+  - [Key Factors](#key-factors)
+- [Pros and Cons Analysis](#pros-and-cons-analysis)
+  - [Advantages](#advantages)
+  - [Disadvantages](#disadvantages)
+- [Latest News and Developments](#latest-news-and-developments)
+  - [Educational Technology Integration](#educational-technology-integration)
+  - [Cybersecurity Awareness](#cybersecurity-awareness)
+  - [Algorithm Visualization](#algorithm-visualization)
+  - [Academic Research](#academic-research)
+  - [Privacy and Security Discussions](#privacy-and-security-discussions)
+- [Contemporary Relevance](#contemporary-relevance)
+  - [Educational Applications](#educational-applications)
+  - [Security Awareness](#security-awareness)
+  - [Research and Development](#research-and-development)
+- [Conclusion](#conclusion)
+- [References](#references)
+
 ## History of the Rail Fence Cipher
 
 ### Ancient Origins

@@ -11,7 +11,9 @@ const blogCollection = defineCollection({
     author: z.string().min(1, 'Author is required'),
     
     // Optional fields
-    thumbnail: image().optional(),     
+    cover: image().optional(),
+    coverAlt: z.string().optional(),
+    thumbnail: image().optional(),
     thumbnailAlt: z.string().optional(),
     tags: z.array(z.string()).default([]),
     category: z.string().optional(),

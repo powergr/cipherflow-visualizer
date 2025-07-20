@@ -7,6 +7,8 @@ author: "Pashalis Laoutaris"
 category: "Basic Classic Symmetric Breakers"
 thumbnail: "./images/caesar-breaker.jpg"
 thumbnailAlt: "Breaking the Caesar Cipher with A Python Script"
+cover: "./images/caesar-breaker.jpg"
+coverAlt: "Breaking the Caesar Cipher with A Python Script"
 ---
 
 ## Breaking the Caesar Cipher: A Python Journey from Comprehensive to Concise

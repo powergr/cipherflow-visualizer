@@ -16,6 +16,42 @@ Welcome to our comprehensive exploration of classical cryptography! Today, we're
 
 Let's unlock the secrets of this remarkable piece of cryptographic history together.
 
+## Table of Contents
+
+- [The Playfair Cipher: A Complete Educational Guide](#the-playfair-cipher-a-complete-educational-guide)
+- [The Historical Context and Origins](#the-historical-context-and-origins)
+  - [The True Inventor: Charles Wheatstone](#the-true-inventor-charles-wheatstone)
+  - [Why "Playfair"?](#why-playfair)
+  - [Military Adoption and Historical Impact](#military-adoption-and-historical-impact)
+  - [The Cryptographic Revolution](#the-cryptographic-revolution)
+- [Understanding the Playfair Cipher: A Complete Technical Guide](#understanding-the-playfair-cipher-a-complete-technical-guide)
+- [Step 1: Creating the Key Square](#step-1-creating-the-key-square)
+- [Final Key Square for `CRYPTOGRAPHY`](#final-key-square-for-cryptography)
+   [Step 2: Preparing the Plaintext](#step-2-preparing-the-plaintext)
+- [Text Preparation Rules](#text-preparation-rules)
+- [Step 3: The Three Encryption Rules](#step-3-the-three-encryption-rules)
+- [Rule 1: Same Row](#rule-1-same-row)
+- [Rule 2: Same Column](#rule-2-same-column)
+- [Rule 3: Rectangle (Most Common)](#rule-3-rectangle-most-common)
+- [Complete Encryption Example](#complete-encryption-example)
+- [Decryption Process](#decryption-process)
+- [Comprehensive Analysis: Strengths and Vulnerabilities](#comprehensive-analysis-strengths-and-vulnerabilities)
+  - [Advantages of the Playfair Cipher](#advantages-of-the-playfair-cipher)
+  - [Vulnerabilities and Limitations](#vulnerabilities-and-limitations)
+  - [Cryptanalytic Approaches](#cryptanalytic-approaches)
+- [Why the Playfair Cipher Remains Educationally Invaluable](#why-the-playfair-cipher-remains-educationally-invaluable)
+  - [Pedagogical Benefits](#pedagogical-benefits)
+  - [Modern Relevance](#modern-relevance)
+- [Variations and Modern Adaptations](#variations-and-modern-adaptations)
+  - [Extended Playfair Systems](#extended-playfair-systems)
+  - [Digital Implementations](#digital-implementations)
+- [Conclusion: The Enduring Legacy](#conclusion-the-enduring-legacy)
+- [References and Further Reading](#references-and-further-reading)
+  - [Primary Educational Resources](#primary-educational-resources)
+  - [Recent Academic and Educational Sources](#recent-academic-and-educational-sources)
+  - [Advanced Academic Resources](#advanced-academic-resources)
+  - [Historical and Military References](#historical-and-military-references)
+
 ## The Historical Context and Origins
 
 ### The True Inventor: Charles Wheatstone
