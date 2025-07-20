@@ -5,6 +5,8 @@ difficulty: "beginner"
 pubDate: 2025-07-18
 author: "Pashalis Laoutaris"
 category: "Hash Functions"
+thumbnail: "./images/sha1-hash.jpg"
+thumbnailAlt: "A visual representation of the SHA-1 hashing algorithm."
 visualizer: "SHA1Visualizer"
 ---
 SHA-1 (Secure Hash Algorithm 1) was for years one of the most widely used cryptographic hash functions for securing digital information. Like MD5, its reputation for security has been eroded by advances in cryptanalysis. This article explores SHA-1's history, technical workings, pros and cons, reasons for its obsolescence, recent news, and provides reliable references.

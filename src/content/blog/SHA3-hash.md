@@ -5,6 +5,8 @@ difficulty: "beginner"
 pubDate: 2025-07-18
 author: "Pashalis Laoutaris"
 category: "Hash Functions"
+thumbnail: "./images/sha3-hash.jpg"
+thumbnailAlt: "A visual representation of the SHA-3 hashing algorithm."
 visualizer: "SHA3Visualizer"
 ---
 
