@@ -5,6 +5,8 @@ difficulty: "beginner"
 pubDate: 2025-07-14
 author: "Pashalis Laoutaris"
 category: "Basic Classic Symmetric"
+thumbnail: "./images/vigenere-cipher.jpg"
+thumbnailAlt: "A visual representation of the Vigenère Cipher Algorithm"
 visualizer: "VigenereVisualizer"
 ---
 ## The Vigenère Cipher: A Journey Through History and Modern Applications

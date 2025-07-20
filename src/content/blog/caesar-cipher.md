@@ -5,6 +5,8 @@ difficulty: "beginner"
 pubDate: 2025-07-07
 author: "Pashalis Laoutaris"
 category: "Basic Classic Symmetric"
+thumbnail: "./images/caesar-cipher.jpg"
+thumbnailAlt: "A visual representation of the Caesar Cipher Algorithm"
 visualizer: "CaesarVisualizer"
 ---
 

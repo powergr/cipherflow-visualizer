@@ -5,6 +5,8 @@ difficulty: "beginner"
 pubDate: 2025-07-15
 author: "Pashalis Laoutaris"
 category: "Basic Classic Symmetric"
+thumbnail: "./images/railfence-cipher.jpg"
+thumbnailAlt: "A visual representation of the Rail Fence Cipher Algorithm"
 visualizer: "RailFenceVisualizer"
 ---
 ## The Rail Fence Cipher: A Complete Educational Guide

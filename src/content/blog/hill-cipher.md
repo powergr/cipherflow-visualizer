@@ -5,6 +5,8 @@ difficulty: "beginner"
 pubDate: 2025-07-15
 author: "Pashalis Laoutaris"
 category: "Basic Classic Symmetric"
+thumbnail: "./images/hill-cipher.jpg"
+thumbnailAlt: "A visual representation of the Hill Cipher Algorithm"
 visualizer: "HillVisualizer"
 ---
 

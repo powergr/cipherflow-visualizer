@@ -5,6 +5,8 @@ difficulty: "beginner"
 pubDate: 2025-07-15
 author: "Pashalis Laoutaris"
 category: "Basic Classic Symmetric"
+thumbnail: "./images/playfair-cipher.jpg"
+thumbnailAlt: "A visual representation of the Playfair Cipher Algorithm"
 visualizer: "PlayfairVisualizer"
 ---
 
