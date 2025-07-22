@@ -23,7 +23,8 @@ The MD5 (Message-Digest Algorithm 5) represents a pivotal moment in cryptographi
 6. [Migration Strategies and Modern Alternatives](#migration-strategies-and-modern-alternatives)
 7. [Educational Value and Learning Objectives](#educational-value-and-learning-objectives)
 8. [Implementation Considerations](#implementation-considerations)
-9. [References and Further Reading](#references-and-further-reading)
+9. [FAQ](#faq)
+10. [References and Further Reading](#references-and-further-reading)
 
 ---
 
@@ -376,6 +377,36 @@ MD5 serves as an excellent educational tool for:
 - Follow current security standards and guidelines
 
 ---
+
+## FAQ
+
+### What is the MD5 algorithm and what does it do?
+
+MD5 is a cryptographic hash function that takes an arbitrary-length input and produces a fixed 128-bit hash value. It was designed for fast integrity checking and digital signatures but is now considered cryptographically broken due to vulnerabilities like collision attacks.
+
+### Why is MD5 no longer considered secure?
+
+MD5 is insecure due to practical collision attacks demonstrated in 2004, which allow attackers to generate different inputs with the same hash. It’s also vulnerable to chosen-prefix attacks, length extension attacks, and rainbow table attacks for password hashing.
+
+### What are the main vulnerabilities of MD5?
+
+MD5’s main vulnerabilities include collision attacks (finding two different inputs with the same hash), chosen-prefix attacks (creating meaningful colliding documents), length extension attacks (extending hashes without knowing the secret), and susceptibility to rainbow table attacks for passwords.
+
+### Can MD5 still be used for any purposes?
+
+MD5 can be used for non-cryptographic purposes, such as file integrity checksums in trusted environments, caching, deduplication, or load balancing, where security is not a concern. It should not be used for cryptographic applications like signatures or password hashing.
+
+### What are the recommended alternatives to MD5?
+
+For cryptographic purposes, use SHA-256 or SHA-3 for digital signatures and file integrity, or Argon2, bcrypt, or scrypt for password hashing. For performance-critical non-cryptographic uses, BLAKE2 or xxHash are faster and more secure alternatives.
+
+### How does MD5 compare to modern hash functions like SHA-256 or BLAKE2?
+
+MD5 is faster but cryptographically broken, making it unsuitable for security-critical applications. SHA-256 is more secure but slower, while BLAKE2 offers comparable speed to MD5 with stronger security, making it a preferred modern alternative.
+
+### Why is MD5 still relevant for educational purposes?
+
+MD5’s simple design and well-documented vulnerabilities make it an excellent tool for teaching hash function concepts, cryptanalysis, and the importance of cryptographic agility. Its historical significance and real-world attack examples provide valuable learning opportunities.
 
 ## References and Further Reading
 

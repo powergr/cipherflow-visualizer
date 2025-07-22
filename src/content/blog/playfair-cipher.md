@@ -27,7 +27,7 @@ Let's unlock the secrets of this remarkable piece of cryptographic history toget
 - [Understanding the Playfair Cipher: A Complete Technical Guide](#understanding-the-playfair-cipher-a-complete-technical-guide)
 - [Step 1: Creating the Key Square](#step-1-creating-the-key-square)
 - [Final Key Square for `CRYPTOGRAPHY`](#final-key-square-for-cryptography)
-   [Step 2: Preparing the Plaintext](#step-2-preparing-the-plaintext)
+  - [Step 2: Preparing the Plaintext](#step-2-preparing-the-plaintext)
 - [Text Preparation Rules](#text-preparation-rules)
 - [Step 3: The Three Encryption Rules](#step-3-the-three-encryption-rules)
 - [Rule 1: Same Row](#rule-1-same-row)
@@ -46,6 +46,7 @@ Let's unlock the secrets of this remarkable piece of cryptographic history toget
   - [Extended Playfair Systems](#extended-playfair-systems)
   - [Digital Implementations](#digital-implementations)
 - [Conclusion: The Enduring Legacy](#conclusion-the-enduring-legacy)
+- [FAQ](#faq)
 - [References and Further Reading](#references-and-further-reading)
   - [Primary Educational Resources](#primary-educational-resources)
   - [Recent Academic and Educational Sources](#recent-academic-and-educational-sources)
@@ -302,7 +303,35 @@ As we continue to develop ever-more sophisticated encryption systems to protect 
 
 Understanding classical systems like Playfair doesn't just teach us about the past; it provides essential context for appreciating the cryptographic challenges and solutions of today and tomorrow.
 
----
+## FAQ
+
+### What is the Playfair Cipher and how does it work?
+
+The Playfair Cipher is a digraphic substitution cipher that encrypts pairs of letters using a 5x5 key square generated from a keyword. It processes plaintext in digraphs, applying three rules (same row, same column, or rectangle) to produce ciphertext, obscuring single-letter frequency patterns.
+
+### Why was the Playfair Cipher considered secure in its time?
+
+The Playfair Cipher was secure in its era because it encrypted letter pairs, making it resistant to simple frequency analysis used against monographic ciphers. Its use of a key square and digraph substitution added complexity that was challenging to break manually.
+
+### What are the main weaknesses of the Playfair Cipher?
+
+The Playfair Cipher is vulnerable to digraph frequency analysis, reverse digraph patterns (AB→XY implies BA→YX), and structural weaknesses in the key square. Modern computers can break it easily using brute force or pattern recognition.
+
+### How is the Playfair Cipher used in education?
+
+The Playfair Cipher is used to teach cryptographic concepts like polygraphic substitution, shared secrets, and algorithmic consistency. Its manual operation and historical significance make it an accessible bridge between simple and modern ciphers for students.
+
+### Can the Playfair Cipher be used for secure communication today?
+
+No, the Playfair Cipher is not secure for modern use due to its susceptibility to computer-based cryptanalysis, including digraph frequency analysis and brute-force attacks. It is primarily used for educational and historical purposes.
+
+### What are the differences between the Playfair Cipher and modern ciphers?
+
+The Playfair Cipher is a manual, digraphic substitution cipher with a limited key space, while modern ciphers (e.g., AES, RSA) use complex mathematical algorithms, larger key spaces, and computational power to provide robust security against advanced attacks.
+
+### Are there modern adaptations of the Playfair Cipher?
+
+Yes, adaptations like the 6x6 Playfair (including numbers) and Four-Square/Two-Square ciphers exist. These are used in educational settings or historical simulations, but they remain insecure compared to modern cryptographic standards.
 
 ## References and Further Reading
 

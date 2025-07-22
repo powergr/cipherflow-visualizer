@@ -41,6 +41,7 @@ The Vigenère cipher stands as one of the most significant achievements in class
   - [2024-2025 Developments](#2024-2025-developments)
   - [Contemporary Relevance](#contemporary-relevance)
 - [Conclusion](#conclusion)
+- [FAQ](#faq)
 - [References](#references)
 
 ## Historical Background
@@ -175,6 +176,36 @@ While the Vigenère cipher is no longer secure by modern standards, it continues
 The Vigenère cipher represents a fascinating chapter in the history of cryptography, demonstrating both human ingenuity and the inevitable march of mathematical progress. While it may have lost its practical security value, its educational and historical significance remains undiminished. From Giovan Battista Bellaso's original invention to modern educational applications, the Vigenère cipher continues to serve as a bridge between past and present, teaching us valuable lessons about security, mathematics, and the eternal struggle between codemakers and codebreakers.
 
 Understanding the Vigenère cipher provides insight into the fundamental principles that underpin modern cryptography, making it an essential component of any comprehensive study of information security. As we face new challenges in cybersecurity, the lessons learned from classical ciphers like the Vigenère continue to inform our approach to protecting sensitive information in an increasingly connected world.
+
+## FAQ
+
+### What is the Vigenère Cipher and how does it work?
+
+The Vigenère Cipher is a polyalphabetic substitution cipher that uses a keyword to shift plaintext letters, applying different Caesar ciphers based on the keyword’s letters. It uses a 26x26 Vigenère square to map plaintext and keyword letters to ciphertext.
+
+### Why was the Vigenère Cipher considered secure historically?
+
+The Vigenère Cipher was considered secure for centuries because its polyalphabetic nature (using multiple Caesar ciphers) made traditional frequency analysis difficult, earning it the nickname "le chiffre indéchiffrable" (the indecipherable cipher).
+
+### What are the main weaknesses of the Vigenère Cipher?
+
+The cipher’s weaknesses include repeating keyword patterns, which enable Kasiski analysis to determine keyword length, and vulnerability to statistical methods. Modern computers can easily break it using frequency analysis and brute force.
+
+### How is the Vigenère Cipher used in education?
+
+The Vigenère Cipher is used to teach cryptographic principles, mathematical concepts like modular arithmetic, and the historical evolution of encryption. Its manual operation and clear mechanics make it ideal for introductory cryptography courses.
+
+### Can the Vigenère Cipher be used for secure communication today?
+
+No, the Vigenère Cipher is not secure for modern use due to its vulnerability to Kasiski analysis and computational attacks. It is used primarily for educational purposes, puzzles, or historical reenactments, not for practical security.
+
+### How does the Vigenère Cipher compare to modern ciphers?
+
+Unlike modern ciphers (e.g., AES, RSA), which use complex mathematical algorithms and large key spaces, the Vigenère Cipher is a simple polyalphabetic cipher with a limited alphabet and predictable patterns, making it insecure for contemporary applications.
+
+### Are there modern adaptations of the Vigenère Cipher?
+
+Modern adaptations include educational tools and visualizations for teaching cryptography, as well as research into modified versions with larger alphabets or combined techniques. However, these remain insecure compared to modern cryptographic standards.
 
 ## References
 

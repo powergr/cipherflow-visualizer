@@ -26,7 +26,8 @@ Both algorithms build upon decades of cryptographic research while introducing r
 6. [Modern Applications and Adoption](#modern-applications-and-adoption)
 7. [Current Developments and Future Outlook](#current-developments-and-future-outlook)
 8. [Implementation Guidelines and Best Practices](#implementation-guidelines-and-best-practices)
-9. [References and Further Reading](#references-and-further-reading)
+9. [FAQ](#faq)
+10. [References and Further Reading](#references-and-further-reading)
 
 ---
 
@@ -365,6 +366,38 @@ As we consider hash functions for 2030 and beyond, BLAKE3 emerges as a leading c
 | **Mobile (ARM64)** | BLAKE3/BLAKE2b | NEON vectorization | Battery-aware threading |
 | **Embedded (ARM Cortex-M)** | BLAKE2s | Constant-time implementation | Minimize RAM usage |
 | **WebAssembly** | BLAKE2b | SIMD.js when supported | Streaming for large data |
+
+---
+
+## FAQ
+
+### What are the main differences between BLAKE2 and BLAKE3?
+
+BLAKE2 offers two variants (BLAKE2b for 64-bit platforms and BLAKE2s for 8/16/32-bit platforms) optimized for speed and security, with a focus on sequential processing. BLAKE3 uses a single universal algorithm with a Merkle tree structure, enabling native parallelism, reduced rounds (7 vs. 10), and superior performance for large inputs and multi-core systems.
+
+### Is BLAKE3 secure enough for cryptographic applications?
+
+Yes, BLAKE3 provides strong cryptographic properties, including 2^(n/2) collision resistance and 2^n preimage resistance, similar to BLAKE2. While BLAKE2 has a longer cryptanalysis history, BLAKE3's design builds on BLAKE2's proven core, making it suitable for security-critical applications.
+
+### When should I choose BLAKE2 over BLAKE3?
+
+Choose BLAKE2 (particularly BLAKE2b) for applications requiring established security with extensive cryptanalysis or when compatibility with existing systems is needed. BLAKE2s is ideal for memory-constrained environments like microcontrollers. BLAKE3 is preferred for modern, high-performance, or parallelized applications.
+
+### How does BLAKE3's performance compare to SHA-256?
+
+BLAKE3 is significantly faster than SHA-256, achieving up to 1,950 MB/s compared to SHA-256's 420 MB/s for 16KB inputs on x86-64 platforms. Its native parallelism allows even greater performance gains on multi-core systems or large files.
+
+### Can BLAKE3 be used in resource-constrained environments?
+
+While BLAKE3 is optimized for modern multi-core systems, it can still operate efficiently in resource-constrained environments due to its low memory footprint (32 KB). However, BLAKE2s may be a better choice for extremely memory-limited devices like microcontrollers.
+
+### Is BLAKE3 backward compatible with BLAKE2?
+
+No, BLAKE3 is not backward compatible with BLAKE2 due to its different internal structure (Merkle tree vs. HAIFA) and reduced round count. Applications using BLAKE2 cannot directly switch to BLAKE3 without rehashing data.
+
+### How do I implement BLAKE2 or BLAKE3 in my project?
+
+Both algorithms are supported in major cryptographic libraries like OpenSSL (BLAKE2), Rust crypto, and Go crypto. BLAKE3 is also available in Python via third-party packages. Refer to the [Implementation Guidelines](#implementation-guidelines-and-best-practices) section for platform-specific recommendations and best practices.
 
 ---
 

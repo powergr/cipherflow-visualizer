@@ -14,8 +14,6 @@ visualizer: "SHA3Visualizer"
 
 SHA-3, also known as **Keccak** (pronounced "ketchak"), is the newest member of the Secure Hash Algorithm family standardized by NIST. Designed to complement SHA-2 rather than replace it, SHA-3 brings a fundamentally different construction and offers robust security for modern digital applications. This article explores SHA-3’s history, variants, how it works, its advantages, why it’s considered future-ready, the latest developments, and a list of reliable references.
 
----
-
 ## Table of Contents
 
 1. [History of SHA-3 (Keccak)](#history-of-sha-3-keccak)
@@ -24,9 +22,8 @@ SHA-3, also known as **Keccak** (pronounced "ketchak"), is the newest member of 
 4. [Pros and Cons of SHA-3](#pros-and-cons-of-sha-3)
 5. [Why SHA-3 is the Modern Standard](#why-sha-3-is-the-modern-standard)
 6. [Latest News about SHA-3](#latest-news-about-sha-3)
-7. [References](#references)
-
----
+7. [FAQ](#faq)
+8. [References](#references)
 
 ## History of SHA-3 (Keccak)
 
@@ -76,16 +73,12 @@ SHA-3’s core innovation is the **sponge construction**, a flexible method for 
 
 #### Example Pseudocode
 
-```plaintext
 Initialize 1600-bit state to zero
 Pad the input message
 For each block:
     XOR block into the state
     Apply the Keccak-f permutation
 Output: Squeeze state to get the required number of output bits
-````
-
----
 
 ## Pros and Cons of SHA-3
 
@@ -98,8 +91,6 @@ Output: Squeeze state to get the required number of output bits
 |Resistant to length-extension attacks||
 |Efficient in hardware||
 
----
-
 ## Why SHA-3 is the Modern Standard
 
 - **Strong Security:** SHA-3 is resistant to all known attacks, including collision, pre-image, and length-extension attacks.
@@ -107,8 +98,6 @@ Output: Squeeze state to get the required number of output bits
 - **Complement to SHA-2:** SHA-3 is not a replacement but an alternative, providing diversity in cryptographic design and defense in depth.
 - **Regulatory Endorsement:** Standardized by NIST as [FIPS 202](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf) and required in some modern protocols.
 - **Post-Quantum Research:** While not quantum-resistant, SHA-3 is being studied for use in post-quantum cryptosystems, and its structure supports new cryptographic applications.
-
----
 
 ## Latest News about SHA-3
 
@@ -118,7 +107,35 @@ Output: Squeeze state to get the required number of output bits
 - **Use in Blockchain:** Some cryptocurrencies and blockchain protocols are exploring or implementing SHA-3 variants for future-proofing.
 - **Software Ecosystem:** All major cryptographic libraries (OpenSSL, BoringSSL, libsodium, Python’s hashlib, etc.) now support SHA-3.
 
----
+## FAQ
+
+### What is SHA-3 and how does it work?
+
+SHA-3 (Keccak) is a cryptographic hash function family using a sponge construction to produce fixed or variable-length hashes (e.g., 256 bits for SHA3-256). It absorbs input data into a state, applies permutations, and squeezes out the hash.
+
+### How is SHA-3 different from SHA-2?
+
+SHA-3 uses a sponge construction, unlike SHA-2’s Merkle-Damgård structure, making it resistant to length-extension attacks and supporting variable-length outputs (SHAKE). SHA-3 is a complementary alternative, not a replacement, for SHA-2.
+
+### Why was SHA-3 developed?
+
+SHA-3 was developed as a backup to SHA-2 in case vulnerabilities were found. Selected through a NIST competition in 2012, its unique design (Keccak) enhances cryptographic diversity and supports new applications like key derivation.
+
+### What are the main use cases for SHA-3?
+
+SHA-3 is used for digital signatures, data integrity checks, key derivation (via SHAKE), and emerging applications like post-quantum cryptography and blockchain. SHA3-256 and SHAKE256 are particularly popular for general security.
+
+### Is SHA-3 more secure than SHA-2?
+
+SHA-3 and SHA-2 both have no known practical attacks, but SHA-3’s sponge construction offers resistance to length-extension attacks and greater flexibility. SHA-2 remains widely used due to its speed and established adoption.
+
+### Is SHA-3 quantum-resistant?
+
+SHA-3 is not quantum-resistant, as quantum computers could theoretically weaken its security (e.g., via Grover’s algorithm). However, its design is being studied for post-quantum applications, and no practical quantum attacks exist yet.
+
+### Why is SHA-3 relevant in 2025?
+
+SHA-3’s relevance stems from its strong security, flexibility (variable outputs via SHAKE), and growing adoption in modern protocols, blockchain, and post-quantum research. It complements SHA-2 as a future-proof cryptographic standard.
 
 ## References
 
@@ -128,7 +145,5 @@ Output: Squeeze state to get the required number of output bits
 - [Wikipedia: SHA-3](https://en.wikipedia.org/wiki/SHA-3)
 - [SHA-3 Announcement (NIST)](https://www.nist.gov/news-events/news/2015/08/nist-releases-sha-3-cryptographic-hash-standard)
 - [OWASP Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)
-
----
 
 > **Note:** For new cryptographic designs and applications, SHA-3 is an excellent choice, especially for future-proofing and interoperability with upcoming standards.

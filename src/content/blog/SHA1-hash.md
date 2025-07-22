@@ -18,7 +18,8 @@ SHA-1 (Secure Hash Algorithm 1) was for years one of the most widely used crypto
 3. [Pros and Cons of SHA-1](#pros-and-cons-of-sha-1)
 4. [Why SHA-1 is Broken](#why-sha-1-is-broken)
 5. [Latest News about SHA-1](#latest-news-about-sha-1)
-6. [References](#references)
+6. [FAQ](#faq)
+7. [References](#references)
 
 ## History of SHA-1
 
@@ -61,7 +62,6 @@ SHA-1 processes data to produce a **160-bit (20-byte)** hash value, usually rend
 
 #### Example in Pseudocode
 
-```plaintext
 for each 512-bit block:
     expand block into 80 32-bit words
     initialize variables a, b, c, d, e with h0-h4
@@ -69,7 +69,6 @@ for each 512-bit block:
         perform round-specific operations and logical functions
     update h0-h4
 output: h0 || h1 || h2 || h3 || h4
-````
 
 ## Pros and Cons of SHA-1
 
@@ -101,6 +100,36 @@ SHA-1 was designed to be collision-resistant, but cryptanalysis has shown this i
 - **Industry Guidance:** NIST, Microsoft, Google, and Mozilla have all issued strong warnings or outright bans on the use of SHA-1 in any security context.
 
 **Bottom Line:** SHA-1 is obsolete and insecure for any use beyond non-critical checksums.
+
+## FAQ
+
+### What is SHA-1 and what does it do?
+
+SHA-1 (Secure Hash Algorithm 1) is a cryptographic hash function that produces a 160-bit hash value from arbitrary input data. It was used for digital signatures, file integrity checks, and SSL/TLS certificates but is now considered insecure.
+
+### Why is SHA-1 no longer considered secure?
+
+SHA-1 is insecure due to practical collision attacks, such as the 2017 SHAttered attack, which showed that two different inputs can produce the same hash. Chosen-prefix collisions (2019) further compromised its reliability for cryptographic purposes.
+
+### What are the main vulnerabilities of SHA-1?
+
+SHA-1 is vulnerable to collision attacks (creating two inputs with the same hash) and chosen-prefix collisions (crafting arbitrary files with matching hashes). These weaknesses make it unsuitable for digital signatures, certificates, or password hashing.
+
+### Can SHA-1 still be used for any purposes?
+
+SHA-1 can be used for non-cryptographic purposes, such as non-security-critical checksums or legacy system compatibility (e.g., Git). However, it should not be used for any security-sensitive applications due to its vulnerabilities.
+
+### What are the recommended alternatives to SHA-1?
+
+Recommended alternatives include SHA-256 or SHA-512 (from the SHA-2 family) and SHA-3 for cryptographic purposes. These algorithms offer stronger collision resistance and are widely supported in modern systems.
+
+### How does SHA-1 compare to MD5?
+
+SHA-1 is historically more secure than MD5, with a longer 160-bit output compared to MD5’s 128-bit output. However, both are now cryptographically broken due to collision vulnerabilities, with SHA-1 being slightly more resistant but still obsolete.
+
+### Why is SHA-1 still relevant for educational purposes?
+
+SHA-1’s historical significance, widespread past use, and well-documented vulnerabilities make it a valuable case study for learning about cryptographic hash functions, collision attacks, and the importance of adopting stronger algorithms like SHA-2 or SHA-3.
 
 ## References
 

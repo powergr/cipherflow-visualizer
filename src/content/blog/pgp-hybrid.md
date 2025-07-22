@@ -25,7 +25,8 @@ visualizer: "PGPVisualizer"
 5. [Why PGP Remains Important](#why-pgp-remains-important)
 6. [Latest News about PGP](#latest-news-about-pgp)
 7. [Alternatives to PGP](#alternatives-to-pgp)
-8. [References](#references)
+8. [FAQ](#faq)
+9. [References](#references)
 
 ---
 
@@ -160,7 +161,35 @@ Recipient:
 | **Keybase**          | Encrypted chat, file sharing, and Git with OpenPGP integration.                 | Social key verification, user-friendly     | Relies on Keybase servers, less decentralized |
 | **VeraCrypt**        | Disk and file encryption for secure storage.                                   | Strong for local storage, easy to use      | No messaging support, not network-based   |
 
----
+## FAQ
+
+### What is PGP and how does it work?
+
+PGP (Pretty Good Privacy) is a hybrid encryption system that combines symmetric (e.g., AES-256) and asymmetric (e.g., RSA) cryptography to secure emails, files, and digital signatures. It encrypts messages with a session key, which is encrypted with the recipient’s public key, and supports signatures for authenticity.
+
+### Why is PGP considered secure?
+
+PGP’s security stems from its use of strong algorithms (AES, RSA/ECC), a decentralized web of trust for key validation, and features like confidentiality, integrity, authentication, and non-repudiation. Regular audits of OpenPGP and GnuPG ensure robustness, though proper key management is critical.
+
+### What are the main challenges of using PGP?
+
+PGP’s challenges include complex key management, a steep learning curve for non-technical users, metadata exposure (e.g., email headers), and lack of optimization for real-time messaging. Misconfiguration or private key leaks can also compromise security.
+
+### What are common use cases for PGP?
+
+PGP is used for secure email (e.g., Thunderbird, ProtonMail), file encryption, code signing (e.g., open-source software), secure messaging in some apps, and data archiving for long-term confidentiality in industries like journalism, law, and cybersecurity.
+
+### How does PGP’s web of trust work?
+
+The web of trust is a decentralized model where users sign each other’s public keys to vouch for their authenticity. Trust is built through a network of these signatures, allowing users to verify keys without relying on centralized certificate authorities.
+
+### What are the alternatives to PGP for secure communication?
+
+Alternatives include the Signal Protocol for real-time messaging, S/MIME for certificate-based email encryption, Age for simple file encryption, Keybase for user-friendly encrypted chat and files, and VeraCrypt for disk encryption. Each has specific strengths and trade-offs.
+
+### Is PGP still relevant in 2025?
+
+Yes, PGP remains relevant for secure email, file encryption, and code signing due to its strong cryptography, open-source nature, and decentralized trust model. Ongoing updates (e.g., GnuPG 2.4.5) and integration with modern platforms like ProtonMail ensure its continued use.
 
 ## References
 

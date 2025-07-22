@@ -26,6 +26,7 @@ In the vast landscape of cryptography, few methods are as historically significa
 - [Cryptanalysis and Breaking the Caesar Cipher](#cryptanalysis-and-breaking-the-caesar-cipher)
 - [The Evolution Beyond Caesar](#the-evolution-beyond-caesar)
 - [Conclusion](#conclusion)
+- [FAQ](#faq)
 - [References](#references)
 
 ## History and Origins
@@ -164,6 +165,36 @@ For educators and students, the Caesar cipher provides an ideal entry point into
 The journey from Caesar's simple letter substitution to today's advanced encryption algorithms illustrates the continuous evolution of cryptographic science. As we face new challenges in cybersecurity, the principles learned from studying the Caesar cipher—the importance of key secrecy, the vulnerabilities of predictable patterns, and the need for sufficient key space—remain as relevant as ever.
 
 Whether you're implementing your first encryption algorithm or teaching others about information security, the Caesar cipher offers a perfect blend of historical significance, educational value, and foundational knowledge that continues to illuminate the path toward understanding modern cryptography.
+
+## FAQ
+
+### What is the Caesar Cipher and how does it work?
+
+The Caesar Cipher is a simple encryption technique where each letter in the plaintext is shifted by a fixed number of positions in the alphabet (e.g., a shift of 3 turns A into D, B into E). The shift value is the key, and decryption reverses the shift to recover the original text.
+
+### Why is the Caesar Cipher considered insecure?
+
+The Caesar Cipher is insecure due to its small key space (only 25 possible shifts for the English alphabet), making it vulnerable to brute-force attacks. It also preserves letter frequency, allowing easy cryptanalysis through frequency analysis, and is susceptible to known-plaintext attacks.
+
+### What is the historical significance of the Caesar Cipher?
+
+Named after Julius Caesar, who used it around 50 BCE for military communications, the Caesar Cipher is one of the earliest known encryption methods. Its simplicity laid the groundwork for more advanced cryptographic techniques, influencing ciphers like Vigenère and systems like ROT13.
+
+### How is the Caesar Cipher used today?
+
+While obsolete for secure communication, the Caesar Cipher is widely used in education to teach cryptography basics, such as encryption, decryption, and key concepts. It is also used in programming exercises and in the ROT13 system for obscuring text like spoilers in online forums.
+
+### How can the Caesar Cipher be broken?
+
+The Caesar Cipher can be broken using brute-force attacks (trying all 25 possible shifts), frequency analysis (comparing letter frequencies in the ciphertext to the target language), or known-plaintext attacks (deducing the shift from matching plaintext-ciphertext pairs).
+
+### What is ROT13, and how does it relate to the Caesar Cipher?
+
+ROT13 is a special case of the Caesar Cipher with a fixed shift of 13. It is used to obscure text, such as spoilers or sensitive content in online forums, because applying ROT13 twice (due to the 26-letter alphabet) reverses the transformation, making it self-decrypting.
+
+### Can the Caesar Cipher be made more secure?
+
+The Caesar Cipher’s simplicity limits its security, but combining it with other techniques (e.g., polyalphabetic ciphers like Vigenère) can increase complexity. However, for modern security needs, advanced algorithms with larger key spaces and mathematical complexity are recommended.
 
 ## References
 

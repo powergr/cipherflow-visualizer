@@ -14,8 +14,6 @@ visualizer: "SHA2Visualizer"
 
 The SHA-2 family of cryptographic hash functions is the gold standard for digital security today. SHA-2 successfully replaced its vulnerable predecessors (MD5 and SHA-1), and remains the default for secure digital signatures, certificates, and data integrity checks worldwide. This article explores the history, inner workings, variants, strengths, and why SHA-2 remains the standard, along with recent developments and references.
 
----
-
 ## Table of Contents
 
 1. [History of SHA-2](#history-of-sha-2)
@@ -24,17 +22,14 @@ The SHA-2 family of cryptographic hash functions is the gold standard for digita
 4. [Pros and Cons of SHA-2](#pros-and-cons-of-sha-2)
 5. [Why SHA-2 is the Current Standard](#why-sha-2-is-the-current-standard)
 6. [Latest News about SHA-2](#latest-news-about-sha-2)
-7. [References](#references)
-
----
+7. [FAQ](#faq)
+8. [References](#references)
 
 ## History of SHA-2
 
 SHA-2 (Secure Hash Algorithm 2) was designed by the United States National Security Agency (NSA) and published by the National Institute of Standards and Technology (NIST) in 2001 as an advancement over SHA-1. SHA-2 consists of a family of six hash functions: SHA-224, SHA-256, SHA-384, SHA-512, SHA-512/224, and SHA-512/256.
 
 The most widely used variants are SHA-224, SHA-256, and SHA-512, which offer increasing levels of output length and security. SHA-2's robust design made it resistant to the weaknesses that plagued earlier algorithms. SHA-2 quickly became the new standard for digital signatures, SSL/TLS certificates, and software integrity.
-
----
 
 ## SHA-2 Variants: SHA-224, SHA-256, and SHA-512
 
@@ -47,8 +42,6 @@ The most widely used variants are SHA-224, SHA-256, and SHA-512, which offer inc
 - **SHA-224**: A shorter digest, useful where storage or bandwidth is limited.
 - **SHA-256**: The most commonly used, balancing speed and strong security.
 - **SHA-512**: Offers higher security and performance on 64-bit architectures.
-
----
 
 ## How SHA-2 Works: A Detailed Guide
 
@@ -75,7 +68,6 @@ All SHA-2 variants process data in blocks, using similar steps but with differen
 
 #### Example (SHA-256) Pseudocode
 
-```plaintext
 Initialize eight 32-bit hash values (H0-H7)
 for each 512-bit block:
     Prepare message schedule (W[0..63])
@@ -84,7 +76,6 @@ for each 512-bit block:
         Perform round-specific functions and mixing
     Add working variables back into H0-H7
 Output H0-H7 concatenated (256 bits)
-````
 
 ## Pros and Cons of SHA-2
 
@@ -95,8 +86,6 @@ Output H0-H7 concatenated (256 bits)
 |Widely adopted and trusted|Not quantum-resistant (like all current hashes)|
 |Efficient on modern hardware|SHA-512 less efficient on 32-bit processors|
 |Flexible (multiple output sizes)|Some legacy systems may not support SHA-2|
-
----
 
 ## Why SHA-2 is the Current Standard
 
@@ -114,8 +103,6 @@ SHA-2 stands as the industry standard because:
 - **SHA-3**: Released as a future-proof alternative, but SHA-2 remains faster and more widely implemented.
 - **Quantum Threat**: SHA-2 is not quantum-safe, but no practical quantum attacks exist yet; NIST is working on post-quantum standards.
 
----
-
 ## Latest News about SHA-2
 
 - **2024**: SHA-2 remains mandatory for digital signatures, certificates, and code integrity in all modern standards.
@@ -124,7 +111,35 @@ SHA-2 stands as the industry standard because:
 - **Cryptocurrency**: Bitcoin and many altcoins continue to use SHA-256 at the core of their security.
 - **Software Development**: SHA-256 and SHA-512 are the default hash algorithms in most cryptographic libraries (OpenSSL, BoringSSL, Windows, Linux, etc.).
 
----
+## FAQ
+
+### What is SHA-2 and what does it do?
+
+SHA-2 is a family of cryptographic hash functions (e.g., SHA-256, SHA-512) that produce fixed-length hash values from arbitrary input data. It is used for digital signatures, SSL/TLS certificates, data integrity checks, and cryptocurrencies like Bitcoin.
+
+### Why is SHA-2 considered secure?
+
+SHA-2 is considered secure because no practical collision or pre-image attacks have been found. Its robust design, extensive vetting, and large hash sizes (224–512 bits) make it resistant to known cryptanalytic techniques.
+
+### What are the main variants of SHA-2?
+
+The main SHA-2 variants are SHA-224 (224-bit digest), SHA-256 (256-bit digest), and SHA-512 (512-bit digest). SHA-224 and SHA-256 use 512-bit blocks, while SHA-512 uses 1024-bit blocks for higher security.
+
+### What are common use cases for SHA-2?
+
+SHA-2 is used for digital signatures, SSL/TLS certificates, code signing, file integrity verification, password hashing (with proper constructions like HMAC), and cryptocurrencies (e.g., SHA-256 in Bitcoin).
+
+### How does SHA-2 compare to SHA-1 and MD5?
+
+SHA-2 is significantly more secure than SHA-1 and MD5, which are vulnerable to collision attacks. SHA-2 offers larger digest sizes and a stronger design, making it the standard for modern cryptographic applications.
+
+### Is SHA-2 quantum-resistant?
+
+SHA-2 is not quantum-resistant, as quantum computers could theoretically reduce its security (e.g., via Grover’s algorithm). However, no practical quantum attacks exist yet, and SHA-2 remains secure for current applications.
+
+### Why is SHA-2 relevant in 2025?
+
+SHA-2 remains the standard for cryptographic security due to its widespread adoption, proven strength, and support in modern systems. It is used in TLS/SSL, cryptocurrencies, and compliance standards, with no practical vulnerabilities identified.
 
 ## References
 
@@ -134,7 +149,5 @@ SHA-2 stands as the industry standard because:
 - [NIST Computer Security Resource Center - SHA-2](https://csrc.nist.gov/projects/hash-functions/sha-2)
 - [RFC 6234: US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)](https://datatracker.ietf.org/doc/html/rfc6234)
 - [Bitcoin Whitepaper (SHA-256 usage)](https://bitcoin.org/bitcoin.pdf)
-
----
 
 > **Note:** For all new cryptographic applications, SHA-2 (especially SHA-256 or SHA-512) is recommended unless a specific regulatory or technical reason requires otherwise.
