@@ -1,0 +1,478 @@
+---
+// src/components/visualizers/SignalVisualizer.astro
+
+import VisualizerLayout from './VisualizerLayout.astro';
+
+const title = "📱 Signal Protocol Visualizer";
+const uniqueId = "signal-visualizer";
+---
+
+<VisualizerLayout {title} {uniqueId}>
+
+    {/* Controls and visualization panel structure remains the same */}
+    <div slot="controls">
+        <div class="control-group">
+            <label for="message-alice">Alice's Message:</label>
+            <input type="text" id="message-alice" value="Hello Bob!" maxlength="50">
+        </div>
+        <div class="control-group">
+            <label for="message-bob">Bob's Message:</label>
+            <input type="text" id="message-bob" value="Hi Alice!" maxlength="50">
+        </div>
+    </div>
+
+    <div slot="actions">
+        <button id="setup-btn">🔐 Setup Protocol</button>
+        <button id="send-msg-btn" disabled>📤 Alice → Bob</button>
+        <button id="receive-msg-btn" disabled>📥 Bob → Alice</button>
+        <button id="reset-btn">↻ Reset</button>
+    </div>
+
+    <div slot="visualization-panel">
+        <div class="signal-container">
+            <!-- Alice's Side -->
+            <div class="participant">
+                <div class="participant-title alice">👩 Alice</div>
+                <div class="key-section">
+                    <div class="section-title">Identity & Long-term Keys</div>
+                    <div class="signal-value-box">
+                        <div class="signal-label">Identity Key (IK)</div>
+                        <div class="signal-value identity" id="alice-identity-key"></div>
+                    </div>
+                    <div class="signal-value-box">
+                        <div class="signal-label">Signed PreKey (SPK)</div>
+                        <div class="signal-value prekey" id="alice-signed-prekey"></div>
+                    </div>
+                    <div class="signal-value-box">
+                        <div class="signal-label">One-time PreKey (OPK)</div>
+                        <div class="signal-value onetime" id="alice-onetime-prekey"></div>
+                    </div>
+                </div>
+                <div class="key-section">
+                    <div class="section-title">Ephemeral & Session</div>
+                    <div class="signal-value-box">
+                        <div class="signal-label">Ephemeral Key (EK)</div>
+                        <div class="signal-value ephemeral" id="alice-ephemeral-key"></div>
+                    </div>
+                    <div class="signal-value-box">
+                        <div class="signal-label">Root Chain Key</div>
+                        <div class="signal-value chain" id="alice-root-key"></div>
+                    </div>
+                    <div class="signal-value-box">
+                        <div class="signal-label">Sending Chain Key</div>
+                        <div class="signal-value chain" id="alice-send-chain-key"></div>
+                    </div>
+                    <div class="signal-value-box">
+                        <div class="signal-label">Receiving Chain Key</div>
+                        <div class="signal-value chain" id="alice-receive-chain-key"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bob's Side -->
+            <div class="participant">
+                <div class="participant-title bob">👨 Bob</div>
+                <div class="key-section">
+                    <div class="section-title">Identity & Long-term Keys</div>
+                    <div class="signal-value-box">
+                        <div class="signal-label">Identity Key (IK)</div>
+                        <div class="signal-value identity" id="bob-identity-key"></div>
+                    </div>
+                    <div class="signal-value-box">
+                        <div class="signal-label">Signed PreKey (SPK)</div>
+                        <div class="signal-value prekey" id="bob-signed-prekey"></div>
+                    </div>
+                    <div class="signal-value-box">
+                        <div class="signal-label">One-time PreKey (OPK)</div>
+                        <div class="signal-value onetime" id="bob-onetime-prekey"></div>
+                    </div>
+                </div>
+                <div class="key-section">
+                    <div class="section-title">Ephemeral & Session</div>
+                    <div class="signal-value-box">
+                        <div class="signal-label">Ephemeral Key (EK)</div>
+                        <div class="signal-value ephemeral" id="bob-ephemeral-key"></div>
+                    </div>
+                    <div class="signal-value-box">
+                        <div class="signal-label">Root Chain Key</div>
+                        <div class="signal-value chain" id="bob-root-key"></div>
+                    </div>
+                    <div class="signal-value-box">
+                        <div class="signal-label">Sending Chain Key</div>
+                        <div class="signal-value chain" id="bob-send-chain-key"></div>
+                    </div>
+                    <div class="signal-value-box">
+                        <div class="signal-label">Receiving Chain Key</div>
+                        <div class="signal-value chain" id="bob-receive-chain-key"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Flow -->
+            <div class="message-flow">
+                <div class="message-flow-title">📨 Message Exchange</div>
+                <div id="message-history"></div>
+            </div>
+        </div>
+    </div>
+
+    <Fragment slot="script">
+        {/*
+          FIX: The CDN <script> tags are removed. Instead, we use a single module script
+          to import the libraries from an ESM-compatible CDN. This resolves the TypeError.
+        */}
+        <script type="module">
+            import * as d3 from 'https://esm.sh/d3';
+            import CryptoJS from 'https://esm.sh/crypto-js';
+
+            // The rest of the script is the same, but now it runs inside a module
+            // where `d3` and `CryptoJS` are correctly imported and available.
+            class SignalProtocolVisualizer {
+                constructor() {
+                    this.isAnimating = false;
+                    this.animationSpeed = 600;
+                    this.setupComplete = false;
+                    this.messageCounter = 0;
+                    
+                    this.alice = {};
+                    this.bob = {};
+                    this.sharedSecrets = {};
+                    
+                    try {
+                        this.initializeElements();
+                        this.setupEventListeners();
+                        this.reset();
+                        console.log('Signal Protocol Visualizer initialized successfully');
+                    } catch (error) {
+                        console.error('Error initializing visualizer:', error);
+                        this.showError('Failed to initialize visualizer: ' + error.message);
+                    }
+                }
+
+                initializeElements() {
+                    this.messageAliceIn = document.getElementById('message-alice');
+                    this.messageBobIn = document.getElementById('message-bob');
+                    if (!this.messageAliceIn || !this.messageBobIn) throw new Error('Input elements not found');
+                    
+                    this.setupBtn = document.getElementById('setup-btn');
+                    this.sendMsgBtn = document.getElementById('send-msg-btn');
+                    this.receiveMsgBtn = document.getElementById('receive-msg-btn');
+                    this.resetBtn = document.getElementById('reset-btn');
+                    if (!this.setupBtn || !this.sendMsgBtn || !this.receiveMsgBtn || !this.resetBtn) throw new Error('Button elements not found');
+                    
+                    this.stepInfo = document.querySelector('#signal-visualizer .step-info');
+                    this.messageHistory = document.getElementById('message-history');
+                    if (!this.stepInfo || !this.messageHistory) throw new Error('Display elements not found');
+
+                    this.val = {
+                        alice: {
+                            identity: document.getElementById('alice-identity-key'),
+                            signedPrekey: document.getElementById('alice-signed-prekey'),
+                            onetimePrekey: document.getElementById('alice-onetime-prekey'),
+                            ephemeral: document.getElementById('alice-ephemeral-key'),
+                            rootKey: document.getElementById('alice-root-key'),
+                            sendChainKey: document.getElementById('alice-send-chain-key'),
+                            receiveChainKey: document.getElementById('alice-receive-chain-key')
+                        },
+                        bob: {
+                            identity: document.getElementById('bob-identity-key'),
+                            signedPrekey: document.getElementById('bob-signed-prekey'),
+                            onetimePrekey: document.getElementById('bob-onetime-prekey'),
+                            ephemeral: document.getElementById('bob-ephemeral-key'),
+                            rootKey: document.getElementById('bob-root-key'),
+                            sendChainKey: document.getElementById('bob-send-chain-key'),
+                            receiveChainKey: document.getElementById('bob-receive-chain-key')
+                        }
+                    };
+                    
+                    for (const p in this.val) for (const el in this.val[p]) if (!this.val[p][el]) throw new Error(`${p}-${el} element not found`);
+                }
+
+                setupEventListeners() {
+                    this.setupBtn.addEventListener('click', () => this.setupProtocol());
+                    this.sendMsgBtn.addEventListener('click', () => this.sendMessage('alice'));
+                    this.receiveMsgBtn.addEventListener('click', () => this.sendMessage('bob'));
+                    this.resetBtn.addEventListener('click', () => this.reset());
+                }
+
+                showError(message) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'error';
+                    errorDiv.textContent = message;
+                    document.querySelector('#signal-visualizer .visualization').appendChild(errorDiv);
+                }
+
+                reset() {
+                    this.isAnimating = false; this.setupComplete = false; this.messageCounter = 0;
+                    this.setupBtn.disabled = false; this.sendMsgBtn.disabled = true; this.receiveMsgBtn.disabled = true;
+                    
+                    try {
+                        Object.values(this.val.alice).forEach(el => el.textContent = '');
+                        Object.values(this.val.bob).forEach(el => el.textContent = '');
+                        this.messageHistory.innerHTML = '';
+                        document.querySelectorAll('#signal-visualizer .error').forEach(e => e.remove());
+                        d3.selectAll('.signal-value').classed('final', false).classed('highlight', false);
+                        this.stepInfo.textContent = "Click \"Setup Protocol\" to initialize Signal's X3DH key agreement and Double Ratchet.";
+                    } catch (error) { console.error('Error during reset:', error); }
+                }
+
+                generateKeyPair() {
+                    try {
+                        const privateKey = CryptoJS.lib.WordArray.random(32).toString();
+                        const publicKey = CryptoJS.SHA256(privateKey + 'public').toString().substring(0, 32);
+                        return { privateKey, publicKey };
+                    } catch (e) { throw new Error('Failed to generate key pair'); }
+                }
+
+                performDH(privateKey, publicKey) {
+                    try { return CryptoJS.SHA256(privateKey + publicKey).toString(); } 
+                    catch (e) { throw new Error('Failed to perform DH operation'); }
+                }
+
+                hkdf(inputKeyMaterial, salt = '', info = '', length = 32) {
+                    try {
+                        const prk = CryptoJS.HmacSHA256(inputKeyMaterial, salt).toString();
+                        return CryptoJS.HmacSHA256(info + '01', prk).toString().substring(0, length * 2);
+                    } catch (e) { throw new Error('Failed to derive key'); }
+                }
+
+                truncate(str, maxLength = 16) {
+                    if (typeof str !== 'string') return '';
+                    return str.length > maxLength ? str.substring(0, maxLength) + '...' : str;
+                }
+
+                async highlight(element) {
+                    return new Promise(resolve => {
+                        if (!element) { resolve(); return; }
+                        element.classList.add('highlight');
+                        setTimeout(() => { element.classList.remove('highlight'); resolve(); }, this.animationSpeed);
+                    });
+                }
+
+                async setupProtocol() {
+                    if (this.isAnimating) return;
+                    try {
+                        this.isAnimating = true; this.setupBtn.disabled = true;
+                        this.stepInfo.textContent = "Step 1: Generating identity and prekey bundles...";
+                        
+                        this.alice = { identityKeyPair: this.generateKeyPair(), signedPrekeyPair: this.generateKeyPair(), onetimePrekeyPair: this.generateKeyPair(), ephemeralKeyPair: this.generateKeyPair() };
+                        this.val.alice.identity.textContent = this.truncate(this.alice.identityKeyPair.publicKey); await this.highlight(this.val.alice.identity);
+                        this.val.alice.signedPrekey.textContent = this.truncate(this.alice.signedPrekeyPair.publicKey); await this.highlight(this.val.alice.signedPrekey);
+                        this.val.alice.onetimePrekey.textContent = this.truncate(this.alice.onetimePrekeyPair.publicKey); await this.highlight(this.val.alice.onetimePrekey);
+                        
+                        this.bob = { identityKeyPair: this.generateKeyPair(), signedPrekeyPair: this.generateKeyPair(), onetimePrekeyPair: this.generateKeyPair(), ephemeralKeyPair: this.generateKeyPair() };
+                        this.val.bob.identity.textContent = this.truncate(this.bob.identityKeyPair.publicKey); await this.highlight(this.val.bob.identity);
+                        this.val.bob.signedPrekey.textContent = this.truncate(this.bob.signedPrekeyPair.publicKey); await this.highlight(this.val.bob.signedPrekey);
+                        this.val.bob.onetimePrekey.textContent = this.truncate(this.bob.onetimePrekeyPair.publicKey); await this.highlight(this.val.bob.onetimePrekey);
+
+                        this.stepInfo.textContent = "Step 2: Performing X3DH key agreement...";
+                        this.val.alice.ephemeral.textContent = this.truncate(this.alice.ephemeralKeyPair.publicKey); await this.highlight(this.val.alice.ephemeral);
+                        this.val.bob.ephemeral.textContent = this.truncate(this.bob.ephemeralKeyPair.publicKey); await this.highlight(this.val.bob.ephemeral);
+
+                        this.stepInfo.textContent = "Computing X3DH shared secrets...";
+                        const dh1 = this.performDH(this.alice.identityKeyPair.privateKey, this.bob.signedPrekeyPair.publicKey);
+                        const dh2 = this.performDH(this.alice.ephemeralKeyPair.privateKey, this.bob.identityKeyPair.publicKey);
+                        const dh3 = this.performDH(this.alice.ephemeralKeyPair.privateKey, this.bob.signedPrekeyPair.publicKey);
+                        const dh4 = this.performDH(this.alice.ephemeralKeyPair.privateKey, this.bob.onetimePrekeyPair.publicKey);
+                        
+                        const rootKey = this.hkdf(dh1 + dh2 + dh3 + dh4, '', 'Signal-Root-Key');
+                        
+                        this.stepInfo.textContent = "Step 3: Initializing Double Ratchet...";
+                        this.alice.rootKey = this.bob.rootKey = rootKey;
+                        this.val.alice.rootKey.textContent = this.truncate(rootKey); await this.highlight(this.val.alice.rootKey);
+                        this.val.bob.rootKey.textContent = this.truncate(rootKey); await this.highlight(this.val.bob.rootKey);
+
+                        const initialChainKey = this.hkdf(rootKey, '', 'Signal-Chain-Key');
+                        this.alice.sendChainKey = this.hkdf(initialChainKey, '', 'Alice-Send');
+                        this.alice.receiveChainKey = this.hkdf(initialChainKey, '', 'Bob-Send');
+                        this.bob.sendChainKey = this.hkdf(initialChainKey, '', 'Bob-Send');
+                        this.bob.receiveChainKey = this.hkdf(initialChainKey, '', 'Alice-Send');
+                        
+                        this.val.alice.sendChainKey.textContent = this.truncate(this.alice.sendChainKey); await this.highlight(this.val.alice.sendChainKey);
+                        this.val.alice.receiveChainKey.textContent = this.truncate(this.alice.receiveChainKey); await this.highlight(this.val.alice.receiveChainKey);
+                        this.val.bob.sendChainKey.textContent = this.truncate(this.bob.sendChainKey); await this.highlight(this.val.bob.sendChainKey);
+                        this.val.bob.receiveChainKey.textContent = this.truncate(this.bob.receiveChainKey); await this.highlight(this.val.bob.receiveChainKey);
+
+                        this.stepInfo.textContent = "Signal Protocol setup complete! Ready for secure messaging.";
+                        this.setupComplete = true; this.sendMsgBtn.disabled = false; this.receiveMsgBtn.disabled = false;
+                    } catch (e) {
+                        this.stepInfo.textContent = "Setup failed: " + e.message; this.setupBtn.disabled = false;
+                    } finally { this.isAnimating = false; }
+                }
+
+                async sendMessage(sender) {
+                    if (this.isAnimating || !this.setupComplete) return;
+                    try {
+                        this.isAnimating = true; this.sendMsgBtn.disabled = true; this.receiveMsgBtn.disabled = true;
+                        const isAlice = sender === 'alice';
+                        const msg = isAlice ? this.messageAliceIn.value : this.messageBobIn.value;
+                        const senderName = isAlice ? 'Alice' : 'Bob';
+                        if (!msg) { this.stepInfo.textContent = `Please enter a message for ${senderName}.`; this.isAnimating = false; this.sendMsgBtn.disabled = false; this.receiveMsgBtn.disabled = false; return; }
+                        
+                        this.messageCounter++;
+                        this.stepInfo.textContent = `${senderName} is sending message: "${msg}"`;
+                        
+                        const senderObj = isAlice ? this.alice : this.bob, receiverObj = isAlice ? this.bob : this.alice;
+                        const senderVal = isAlice ? this.val.alice : this.val.bob, receiverVal = isAlice ? this.val.bob : this.val.alice;
+                        
+                        const msgKey = this.hkdf(senderObj.sendChainKey, '', `Message-${this.messageCounter}`);
+                        const newChainKey = this.hkdf(senderObj.sendChainKey, '', 'Chain-Advance');
+                        senderObj.sendChainKey = newChainKey;
+                        senderVal.sendChainKey.textContent = this.truncate(newChainKey);
+                        await this.highlight(senderVal.sendChainKey);
+
+                        const encrypted = CryptoJS.AES.encrypt(msg, msgKey).toString();
+                        this.stepInfo.textContent = `${isAlice ? 'Bob' : 'Alice'} is receiving and decrypting message...`;
+                        
+                        const receiverMsgKey = this.hkdf(receiverObj.receiveChainKey, '', `Message-${this.messageCounter}`);
+                        const newReceiveChainKey = this.hkdf(receiverObj.receiveChainKey, '', 'Chain-Advance');
+                        receiverObj.receiveChainKey = newReceiveChainKey;
+                        receiverVal.receiveChainKey.textContent = this.truncate(newReceiveChainKey);
+                        await this.highlight(receiverVal.receiveChainKey);
+
+                        const decrypted = CryptoJS.AES.decrypt(encrypted, receiverMsgKey).toString(CryptoJS.enc.Utf8);
+                        if (!decrypted) throw new Error("Decryption failed. Keys are out of sync.");
+                        
+                        const box = document.createElement('div');
+                        box.className = 'message-box';
+                        const senderIcon = isAlice ? '👩' : '👨', receiverIcon = isAlice ? '👨' : '👩';
+                        box.innerHTML = `
+                            <div style="font-weight: bold;">${senderIcon} ${senderName} → ${receiverIcon} ${isAlice ? 'Bob' : 'Alice'}</div>
+                            <div style="margin-top: 8px;">Plaintext: <strong style="color: #51cf66;">"${decrypted}"</strong></div>
+                            <div class="signal-value-box" style="margin-top: 8px;">
+                                <div class="signal-label">Encrypted Message</div>
+                                <div class="signal-value message">${this.truncate(encrypted, 60)}</div>
+                            </div>`;
+                        this.messageHistory.appendChild(box);
+                        box.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                        
+                        this.stepInfo.textContent = `Message successfully sent and decrypted! Chains advanced.`;
+                        await this.highlight(box);
+                    } catch (e) {
+                        this.showError(`Action failed: ${e.message}`);
+                        this.stepInfo.textContent = "An error occurred. Please reset the protocol.";
+                    } finally {
+                        this.isAnimating = false;
+                        if (this.setupComplete) { this.sendMsgBtn.disabled = false; this.receiveMsgBtn.disabled = false; }
+                    }
+                }
+            }
+
+            // The DOMContentLoaded listener ensures the DOM is ready before the script runs.
+            // Since our script is now a module, it might execute before or after DOM parsing.
+            // This ensures we don't try to access elements that don't exist yet.
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => new SignalProtocolVisualizer());
+            } else {
+                new SignalProtocolVisualizer();
+            }
+        </script>
+    </Fragment>
+</VisualizerLayout>
+
+{/* Component-specific styles remain the same and are automatically scoped by Astro */}
+<style>
+    .visualization {
+        min-height: 500px;
+    }
+    #send-msg-btn {
+        background: linear-gradient(45deg, #48dbfb, #0abde3);
+    }
+    #receive-msg-btn {
+        background: linear-gradient(45deg, #51cf66, #40c057);
+    }
+    .signal-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        width: 100%;
+        margin-top: 20px;
+    }
+    .participant {
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .participant-title {
+        text-align: center;
+        font-size: 1.4em;
+        margin-bottom: 15px;
+        font-weight: bold;
+        padding: 10px;
+        border-radius: 10px;
+    }
+    .alice { background: linear-gradient(45deg, #ff6b6b, #ee5a24); }
+    .bob { background: linear-gradient(45deg, #48dbfb, #0abde3); }
+    .key-section {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+    .section-title {
+        font-weight: bold;
+        font-size: 14px;
+        margin-bottom: 10px;
+        color: rgba(255, 255, 255, 0.9);
+    }
+    .signal-value-box { margin-bottom: 8px; }
+    .signal-label { font-weight: bold; font-size: 12px; color: rgba(255, 255, 255, 0.8); }
+    .signal-value {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 6px;
+        border-radius: 6px;
+        margin-top: 3px;
+        min-height: 16px;
+        word-wrap: break-word;
+        transition: all 0.3s ease;
+        max-height: 60px;
+        overflow-y: auto;
+    }
+    .identity { border-left: 4px solid #ffd93d; }
+    .ephemeral { border-left: 4px solid #ff6b6b; }
+    .prekey { border-left: 4px solid #48dbfb; }
+    .onetime { border-left: 4px solid #51cf66; }
+    .chain { border-left: 4px solid #a55eea; }
+    .message { border-left: 4px solid #26d0ce; }
+    .final { border: 2px solid #51cf66; box-shadow: 0 0 15px rgba(81, 207, 102, 0.5); }
+    .highlight { 
+        transform: scale(1.02); 
+        box-shadow: 0 0 15px rgba(255, 235, 59, 0.8);
+        background-color: rgba(255, 235, 59, 0.2) !important;
+    }
+    .message-flow {
+        grid-column: 1 / -1;
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    .message-flow-title {
+        text-align: center;
+        font-size: 1.3em;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+    .message-box {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        border-left: 4px solid #26d0ce;
+        transition: all 0.3s ease;
+    }
+    .error {
+        color: #ff6b6b;
+        background: rgba(255, 107, 107, 0.1);
+        padding: 10px;
+        border-radius: 8px;
+        margin: 10px 0;
+        grid-column: 1 / -1;
+    }
+</style>
