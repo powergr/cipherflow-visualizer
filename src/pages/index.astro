@@ -215,4 +215,44 @@ const base = import.meta.env.BASE_URL;
       </div>
     </div>
   </section>
+    <script define:vars={{ base }}>
+    const newsletterForm = document.querySelector('form[action*="mailerlite.com"]');
+    
+    if (newsletterForm) {
+      newsletterForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Stop the default form submission which shows the ugly JSON
+
+        const submitButton = newsletterForm.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = 'Subscribing...';
+
+        const formData = new FormData(newsletterForm);
+        const actionURL = newsletterForm.action;
+
+        try {
+          // Send the data in the background. We use 'no-cors' mode because
+          // we don't need to read the response, just send the data.
+          await fetch(actionURL, {
+            method: 'POST',
+            body: new URLSearchParams(formData).toString(),
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            mode: 'no-cors', 
+          });
+
+          // If the fetch command completes without error, it means the data was sent.
+          // Now, we manually redirect to our beautiful thank-you page.
+          window.location.href = `${base}/subscription-thank-you`;
+
+        } catch (error) {
+          console.error("Subscription failed:", error);
+          alert("Sorry, we couldn't subscribe you at this time. Please try again.");
+          submitButton.disabled = false;
+          submitButton.innerHTML = originalButtonText;
+        }
+      });
+    }
+  </script>
 </BaseLayout>

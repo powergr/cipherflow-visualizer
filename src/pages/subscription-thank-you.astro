@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const pageTitle = "Confirm Your Subscription!";
+const pageDescription = "Thank you for subscribing to the CipherFlow newsletter. Please check your email to confirm your subscription.";
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <div class="max-w-4xl mx-auto px-6 py-12 text-center">
+    <header class="mb-8">
+      <!-- You can use a different icon, like an email icon -->
+      <svg class="w-16 h-16 mx-auto mb-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+      </svg>
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">One Last Step!</h1>
+      <p class="text-xl text-gray-600 dark:text-gray-300">Thank you for subscribing.</p>
+    </header>
+
+    <div class="prose prose-lg prose-gray dark:prose-invert max-w-none mx-auto">
+      <p>
+        We've sent a confirmation email to the address you provided. 
+        <strong>Please click the link in that email to confirm your subscription.</strong> 
+        You won't receive any newsletters from us until you do.
+      </p>
+      <a href=`${base}/blog` class="inline-block mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg no-underline hover:bg-blue-700 transition-colors">
+        Return to the Blog
+      </a>
+    </div>
+  </div>
+</BaseLayout>
