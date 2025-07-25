@@ -1,10 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-
 const pageTitle = "Contact Us";
-const pageDescription = "Have a question, feedback, or a suggestion? Get in touch with the CipherFlow team. We'd love to hear from you.";
-
-// We still need the base path for our final redirect in the script
+const pageDescription = "Get in touch with the CipherFlow team.";
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -16,23 +13,15 @@ const base = import.meta.env.BASE_URL;
     </header>
 
     <div class="max-w-xl mx-auto">
-      
       <!-- 
-        =====================================================================
-        THE FORM: It has the data-netlify attribute for detection, but NO action.
-        The JavaScript below will handle the submission.
-        =====================================================================
+        This form's only purpose is to gather data for our JavaScript.
+        It posts to the current page, and the script intercepts it.
+        It is linked to the "ghost" form via the hidden "form-name" input.
       -->
-      <form 
-        name="contact" 
-        method="POST" 
-        data-netlify="true"
-        data-netlify-honeypot="bot-field"
-        class="space-y-6"
-      >
+      <form name="contact" method="POST" class="space-y-6">
         <input type="hidden" name="form-name" value="contact" />
         <p class="hidden"><label>Don’t fill this out if you’re human: <input name="bot-field" /></label></p>
-
+        
         <div>
           <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
           <input type="text" name="name" id="name" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500" />
@@ -57,43 +46,27 @@ const base = import.meta.env.BASE_URL;
     </div>
   </div>
 
-  <!-- 
-    =====================================================================
-    THE JAVASCRIPT: This takes control of the form submission.
-    =====================================================================
-  -->
   <script define:vars={{ base }}>
     const form = document.querySelector('form[name="contact"]');
-    
     form.addEventListener('submit', async (event) => {
-      event.preventDefault(); // Stop the browser from navigating
-
+      event.preventDefault();
       const submitButton = form.querySelector('button[type="submit"]');
-      const originalButtonText = submitButton.innerHTML;
       submitButton.disabled = true;
       submitButton.innerHTML = 'Sending...';
 
       const formData = new FormData(form);
-
       try {
-        const response = await fetch('/', {
+        await fetch('/', { // The path here doesn't matter as much as the content
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams(formData).toString()
         });
-
-        if (response.ok) {
-          // If submission is successful, redirect to the thank-you page
-          window.location.href = `${base}/thank-you`;
-        } else {
-          // Handle server errors
-          throw new Error(`Server error: ${response.statusText}`);
-        }
+        window.location.href = `${base}/thank-you`; // Manually redirect on success
       } catch (error) {
         console.error('Form submission error:', error);
-        alert('Sorry, there was an error submitting your form. Please try again.');
+        alert('Sorry, there was an error submitting your form.');
         submitButton.disabled = false;
-        submitButton.innerHTML = originalButtonText;
+        submitButton.innerHTML = 'Send Message';
       }
     });
   </script>

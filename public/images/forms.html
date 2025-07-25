@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Form Registration</title>
+</head>
+<body>
+    <!-- 
+        This form is never shown to a user. Its only purpose is to be found
+        by Netlify's build bot. It registers a form named "contact" with
+        all the correct fields. This bypasses any issues with Astro's build process.
+    -->
+    <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+        <input type="text" name="name" />
+        <input type="email" name="email" />
+        <textarea name="message"></textarea>
+    </form>
+</body>
+</html>
