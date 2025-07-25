@@ -8,6 +8,7 @@ category: "Hash Functions"
 thumbnail: "./images/md5-hash.jpg"
 thumbnailAlt: "A visual representation of the MD-5 hashing algorithm."
 visualizer: "MD5Visualizer"
+tags: ["Hashing", "MD5", "Cryptography", "Hash Function"]
 ---
 ## Understanding the MD5 Algorithm: A Comprehensive Technical Guide
 

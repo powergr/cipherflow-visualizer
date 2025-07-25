@@ -8,6 +8,7 @@ category: "Basic Classic Symmetric"
 thumbnail: "./images/playfair-cipher.jpg"
 thumbnailAlt: "A visual representation of the Playfair Cipher Algorithm"
 visualizer: "PlayfairVisualizer"
+tags: ["Classic Cipher", "Playfair Cipher", "Encryption", "Polygraphic Cipher"]
 ---
 
 ## The Playfair Cipher: A Complete Educational Guide

@@ -8,6 +8,7 @@ category: "Hash Functions"
 thumbnail: "./images/sha2-hash.jpg"
 thumbnailAlt: "A visual representation of the SHA-2 hashing algorithm."
 visualizer: "SHA2Visualizer"
+tags: ["Hashing", "SHA-2", "Cryptography", "Hash Function", "NIST"]
 ---
 
 ## Understanding the SHA-2 Family: SHA-224, SHA-256, and SHA-512

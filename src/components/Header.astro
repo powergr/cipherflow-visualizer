@@ -20,9 +20,7 @@ const navigationItems = [
       <!-- Logo and site name -->
       <div class="flex items-center">
       <a href={base} class="flex items-center space-x-3 text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
-       <!-- The new image tag replaces the old SVG block -->
-        <img src={logo.src} alt="CipherFlow Logo" class="w-8 h-8">
-  
+       <img src={logo.src} alt="CipherFlow Logo" class="w-8 h-8">
        <span class="hidden sm:block">CipherFlow</span>
       </a>
       </div>
@@ -115,9 +113,9 @@ const navigationItems = [
         <div class="relative">
           <input
             type="text"
-            id="search-input"
-            class="input pl-10 pr-4 text-gray-900 dark:text-gray-900"
-            placeholder="Search articles..."
+            id="search-input-global"
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500"
+            placeholder="Search articles and press Enter..."
             autocomplete="off"
           />
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -127,9 +125,7 @@ const navigationItems = [
           </div>
         </div>
         
-        <div id="search-results" class="mt-4 max-h-60 overflow-y-auto">
-          <p class="text-sm text-gray-500 dark:text-gray-400">Start typing to search...</p>
-        </div>
+        <!-- Search results div is removed as we are redirecting -->
       </div>
     </div>
   </div>
@@ -165,18 +161,16 @@ const navigationItems = [
   const searchToggle = document.getElementById('search-toggle');
   const searchOverlay = document.getElementById('search-overlay');
   const searchClose = document.getElementById('search-close');
-  const searchInput = document.getElementById('search-input');
-  const searchResults = document.getElementById('search-results');
+  const searchInputGlobal = document.getElementById('search-input-global');
 
   function openSearch() {
     searchOverlay?.classList.remove('hidden');
-    searchInput?.focus();
+    searchInputGlobal?.focus();
   }
 
   function closeSearch() {
     searchOverlay?.classList.add('hidden');
-    if (searchInput) searchInput.value = '';
-    if (searchResults) searchResults.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Start typing to search...</p>';
+    if (searchInputGlobal) searchInputGlobal.value = '';
   }
 
   searchToggle?.addEventListener('click', openSearch);
@@ -187,70 +181,36 @@ const navigationItems = [
   });
 
   // Search input handling
-  let searchTimeout;
-  searchInput?.addEventListener('input', (e) => {
-    const query = e.target.value;
-    
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-      if (query.length > 2) {
-        performSearch(query);
-      } else {
-        if (searchResults) searchResults.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Start typing to search...</p>';
+  searchInputGlobal?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const query = searchInputGlobal.value.trim();
+      if (query) {
+        // Construct the URL and redirect the user to the blog page with the search query
+        const searchUrl = `${base}/blog?search=${encodeURIComponent(query)}`;
+        window.location.href = searchUrl;
       }
-    }, 300);
+    }
   });
-
-  // Simple search function (you can enhance this with a real search API)
-  function performSearch(query) {
-    if (!searchResults) return;
-    
-    searchResults.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">Searching...</p>';
-    
-    // Simulate search (replace with real search logic)
-    setTimeout(() => {
-      const mockResults = [
-        { title: 'Introduction to Data Visualization', href: '/blog/data-visualization-intro' },
-        { title: 'Advanced D3.js Techniques', href: '/blog/advanced-d3-techniques' },
-        { title: 'Machine Learning Basics', href: '/blog/ml-basics' }
-      ].filter(result => result.title.toLowerCase().includes(query.toLowerCase()));
-
-      if (mockResults.length > 0) {
-        searchResults.innerHTML = mockResults.map(result => `
-          <a href="${base}${result.href}" class="block p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200">
-            <p class="text-sm font-medium text-gray-900 dark:text-white">${result.title}</p>
-          </a>
-        `).join('');
-      } else {
-        searchResults.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">No results found.</p>';
-      }
-    }, 500);
-  }
 
   // Reading progress bar
   const progressBar = document.getElementById('reading-progress');
   
   function updateReadingProgress() {
     if (!progressBar) return;
-    
     const scrollTop = window.pageYOffset;
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
     const scrollPercent = (scrollTop / docHeight) * 100;
-    
     progressBar.style.width = `${Math.min(scrollPercent, 100)}%`;
   }
-
   window.addEventListener('scroll', updateReadingProgress);
   
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
-    // Cmd/Ctrl + K to open search
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
       openSearch();
     }
-    
-    // Escape to close search
     if (e.key === 'Escape' && !searchOverlay?.classList.contains('hidden')) {
       closeSearch();
     }

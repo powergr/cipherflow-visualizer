@@ -8,6 +8,7 @@ category: "Basic Classic Symmetric"
 thumbnail: "./images/railfence-cipher.jpg"
 thumbnailAlt: "A visual representation of the Rail Fence Cipher Algorithm"
 visualizer: "RailFenceVisualizer"
+tags: ["Classic Cipher", "Rail Fence Cipher", "Transposition Cipher", "Cryptography"]
 ---
 ## The Rail Fence Cipher: A Complete Educational Guide
 

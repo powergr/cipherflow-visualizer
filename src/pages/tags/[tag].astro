@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogCard from '../../components/BlogCard.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { blogUtils } from '../../content/config';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('blog');
+  const publishedPosts = blogUtils.filterPublished(allPosts);
+  const allTags = blogUtils.getAllTags(publishedPosts);
+
+  // Return a page for each tag
+  return allTags.map(tag => {
+    // Filter posts that include the current tag
+    const postsForTag = publishedPosts.filter(post => 
+      post.data.tags.map(t => t.toLowerCase()).includes(tag.toLowerCase())
+    );
+
+    return {
+      params: { tag: tag.toLowerCase().replace(/\s+/g, '-') },
+      props: { 
+        tagName: tag,
+        posts: postsForTag 
+      },
+    };
+  });
+}
+
+const { tagName, posts } = Astro.props;
+const pageTitle = `Articles tagged with #${tagName}`;
+const pageDescription = `Explore all articles and tutorials tagged with "${tagName}" on CipherFlow.`;
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <div class="container mx-auto px-6 py-12">
+    <header class="text-center mb-12">
+      <p class="text-lg font-semibold text-blue-600 dark:text-blue-400">Tag Archive</p>
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mt-2">
+        #{tagName}
+      </h1>
+      <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">
+        Found {posts.length} article{posts.length !== 1 ? 's' : ''} with this tag.
+      </p>
+    </header>
+
+    <!-- Posts Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {posts.map((post: CollectionEntry<'blog'>) => (
+        <BlogCard post={post} />
+      ))}
+    </div>
+  </div>
+</BaseLayout>

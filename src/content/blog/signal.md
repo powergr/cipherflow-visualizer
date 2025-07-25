@@ -8,6 +8,7 @@ category: "Hybrid Functions"
 thumbnail: "./images/signal.jpg"
 thumbnailAlt: "A visual representation of the Signal Protocol."
 visualizer: "SignalVisualizer"
+tags: ["Signal Protocol", "Secure Messaging", "End-to-End Encryption", "Privacy"]
 ---
 An in-depth look at the Signal protocol, the gold standard for end-to-end encryption, will be provided in this article.
 

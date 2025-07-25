@@ -1,13 +1,54 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const pageTitle = "Documentation";
+const pageDescription = "Learn how to use CipherFlow's interactive visualizers and get the most out of our educational tools.";
 ---
-<BaseLayout title="Documentation" description="Documentation for CipherFlow tools and resources.">
-  <div class="container mx-auto px-6 py-16">
-    <div class="max-w-3xl mx-auto">
-      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-6">Documentation</h1>
-      <div class="prose dark:prose-invert max-w-none">
-        <p>This page will host project documentation. It is currently under construction.</p>
-      </div>
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <div class="max-w-4xl mx-auto px-6 py-12">
+    <header class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Documentation</h1>
+      <p class="text-xl text-gray-600 dark:text-gray-300">A guide to using the CipherFlow platform.</p>
+    </header>
+
+    <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+      <h2>How to Use the Visualizers</h2>
+      <p>
+        Our interactive visualizers are the core of CipherFlow. They are designed to be intuitive, but here is a breakdown of the common controls you will find:
+      </p>
+      <ul>
+        <li>
+          <strong>Enter Text:</strong> This is the input field for your plaintext message that you wish to encrypt.
+        </li>
+        <li>
+          <strong>Key Input:</strong> For algorithms that require a key (like Caesar, Vigenère, etc.), this is where you will enter it.
+        </li>
+        <li>
+          <strong>Generate/Encrypt Button:</strong> Click this to start the step-by-step visualization process.
+        </li>
+        <li>
+          <strong>Speed Control:</strong> Use the slider to adjust the speed of the animation, allowing you to follow along at your own pace.
+        </li>
+        <li>
+          <strong>Step-by-Step Breakdown:</strong> As the visualization runs, a panel will typically show a log or explanation of each transformation, substitution, or permutation as it happens.
+        </li>
+      </ul>
+
+      <h2>About the Content</h2>
+      <p>
+        Each article on CipherFlow is designed to be a comprehensive guide to a specific topic. We categorize our content by difficulty (Beginner, Intermediate, Advanced) to help you find material that is appropriate for your level of knowledge.
+      </p>
+      
+      <h2>Technical Details</h2>
+      <p>
+        This website is built using <a href="https://astro.build/" target="_blank" rel="noopener noreferrer">Astro</a>, a modern static site generator, and styled with <a href="https://tailwindcss.com/" target="_blank" rel="noopener noreferrer">Tailwind CSS</a>. The interactive visualizations are built with vanilla JavaScript to ensure they are fast and accessible. The site is hosted on GitHub Pages.
+      </p>
+
+      <h2>Questions or Feedback?</h2>
+      <p>
+        If you have any questions, spot a bug, or have a suggestion for a new visualizer, please <a href="/contact">get in touch</a>! We'd love to hear from you.
+      </p>
     </div>
   </div>
 </BaseLayout>

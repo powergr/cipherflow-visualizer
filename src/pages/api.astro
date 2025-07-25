@@ -1,13 +1,24 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const pageTitle = "API";
+const pageDescription = "Information about the CipherFlow API for developers.";
 ---
-<BaseLayout title="API Information" description="Information on the CipherFlow API.">
-  <div class="container mx-auto px-6 py-16">
-    <div class="max-w-3xl mx-auto">
-      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-6">API</h1>
-      <div class="prose dark:prose-invert max-w-none">
-        <p>This page will provide details about our API. It is currently under construction.</p>
-      </div>
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <div class="max-w-4xl mx-auto px-6 py-12 text-center">
+    <header class="mb-8">
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Developer API</h1>
+      <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">Coming Soon</p>
+    </header>
+
+    <div class="prose prose-lg prose-gray dark:prose-invert max-w-none mx-auto">
+      <p>
+        We are currently developing a public API that will allow developers to access our article data and potentially interact with our cryptographic tools programmatically.
+      </p>
+      <p>
+        If you are interested in being notified when the API is available, please subscribe to our newsletter on the homepage or follow our project on GitHub.
+      </p>
     </div>
   </div>
 </BaseLayout>

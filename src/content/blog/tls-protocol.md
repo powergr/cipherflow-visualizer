@@ -8,6 +8,7 @@ category: "Hybrid Functions"
 thumbnail: "./images/tls.jpg"
 thumbnailAlt: "A visual representation of the TLS Protocol"
 visualizer: "TlsVisualizer"
+tags: ["TLS", "Web Security", "HTTPS", "Cryptography", "Network Security"]
 ---
 ## Understanding TLS: The Backbone of Secure Internet Communication
 
