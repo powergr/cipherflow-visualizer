@@ -1,7 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { BLOG_CONFIG } from '../content/config'; // Assuming you have this for the base URL
+
 const pageTitle = "Contact Us";
-const pageDescription = "Get in touch with the CipherFlow team.";
+const pageDescription = "Have a question, feedback, or a suggestion? Get in touch with the CipherFlow team. We'd love to hear from you.";
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -14,27 +16,34 @@ const base = import.meta.env.BASE_URL;
 
     <div class="max-w-xl mx-auto">
       <!-- 
-        This form's only purpose is to gather data for our JavaScript.
-        It posts to the current page, and the script intercepts it.
-        It is linked to the "ghost" form via the hidden "form-name" input.
+        This form is now configured for FormSubmit.co
+        - Replace 'your@email.com' with your real email address.
+        - After the first submission, you'll need to check your email to activate the form.
       -->
-      <form name="contact" method="POST" class="space-y-6">
-        <input type="hidden" name="form-name" value="contact" />
-        <p class="hidden"><label>Don’t fill this out if you’re human: <input name="bot-field" /></label></p>
+      <form action="https://formsubmit.co/support@laoutaris.com" method="POST" class="space-y-6">
         
+        <!-- This tells FormSubmit where to redirect the user after a successful submission. -->
+        <input type="hidden" name="_next" value=`${Astro.url.origin}${base}/thank-you`>
+        
+        <!-- Optional: You can set a custom subject line for the emails you receive. -->
+        <input type="hidden" name="_subject" value="New submission from CipherFlow!">
+
+        <!-- Optional: This prevents bots from filling out your form. -->
+        <input type="text" name="_honey" style="display:none">
+
         <div>
           <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
-          <input type="text" name="name" id="name" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500" />
+          <input type="text" name="name" id="name" required class="w-full mt-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
         </div>
 
         <div>
           <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email Address</label>
-          <input type="email" name="email" id="email" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500" />
+          <input type="email" name="email" id="email" required class="w-full mt-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
         </div>
 
         <div>
           <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Message</label>
-          <textarea name="message" id="message" rows="4" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"></textarea>
+          <textarea name="message" id="message" rows="4" required class="w-full mt-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"></textarea>
         </div>
 
         <div>
@@ -45,44 +54,4 @@ const base = import.meta.env.BASE_URL;
       </form>
     </div>
   </div>
-
- <script define:vars={{ base }}>
-    const form = document.querySelector('form[name="contact"]');
-    
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault(); // Stop the browser from navigating
-
-      const submitButton = form.querySelector('button[type="submit"]');
-      const originalButtonText = submitButton.innerHTML;
-      submitButton.disabled = true;
-      submitButton.innerHTML = 'Sending...';
-
-      const formData = new FormData(form);
-
-      try {
-        const response = await fetch('/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams(formData).toString()
-        });
-
-        // --- NEW: Check if the server response was actually successful ---
-        if (response.ok) {
-          alert("Success! We will now redirect."); // Show a success message for now
-          // --- TEMPORARILY DISABLED: This is the redirect we need to stop ---
-          // window.location.href = `${base}/thank-you`;
-        } else {
-          // If the server responded with an error (like 405), throw an error to be caught below
-          throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
-        }
-        
-      } catch (error) {
-        console.error('Form submission error:', error);
-        // --- NEW: Show a more detailed error message to the user ---
-        alert(`Sorry, there was an error submitting your form. Please open the developer console to see the details. Error: ${error.message}`);
-        submitButton.disabled = false;
-        submitButton.innerHTML = originalButtonText;
-      }
-    });
-  </script>
 </BaseLayout>
