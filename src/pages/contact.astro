@@ -3,6 +3,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 const pageTitle = "Contact Us";
 const pageDescription = "Have a question, feedback, or a suggestion? Get in touch with the CipherFlow team. We'd love to hear from you.";
+
+// Get the base path for the form's action attribute
+const base = import.meta.env.BASE_URL;
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
@@ -16,36 +19,31 @@ const pageDescription = "Have a question, feedback, or a suggestion? Get in touc
       
       <!-- 
         =====================================================================
-        STEP 1: THE HIDDEN BLUEPRINT FORM for Netlify's build bot.
-        This is what registers your form during deployment. It's never seen by users.
-        It has the magic data-netlify attribute.
-        =====================================================================
-      -->
-      <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
-        <input type="text" name="name" />
-        <input type="email" name="email" />
-        <textarea name="message"></textarea>
-      </form>
-
-      <!-- 
-        =====================================================================
-        STEP 2: THE VISIBLE FORM for users.
-        - It has NO data-netlify attribute.
-        - It has NO action attribute. It posts to the current page.
-        - It includes a hidden "form-name" input to link it to the blueprint.
+        THE ONE AND ONLY FORM: This version has every required attribute.
+        - name: Identifies the form.
+        - method="POST": Prevents the 405 error.
+        - data-netlify="true": The magic attribute that activates Netlify's handler.
+        - data-netlify-honeypot: For spam protection.
+        - action: The CORRECT path to the success page, using the base variable.
         =====================================================================
       -->
       <form 
         name="contact" 
-        method="POST"
+        method="POST" 
+        data-netlify="true" 
+        data-netlify-honeypot="bot-field"
+        action=`${base}/thank-you`
         class="space-y-6"
       >
+        {/* This hidden input helps ensure Netlify correctly identifies the form name */}
         <input type="hidden" name="form-name" value="contact" />
         
+        {/* The hidden honeypot field for spam protection */}
         <p class="hidden">
           <label>Don’t fill this out if you’re human: <input name="bot-field" /></label>
         </p>
 
+        {/* --- Visible Form Fields --- */}
         <div>
           <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
           <input type="text" name="name" id="name" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500">
@@ -67,6 +65,7 @@ const pageDescription = "Have a question, feedback, or a suggestion? Get in touc
           </button>
         </div>
       </form>
+      
     </div>
   </div>
 </BaseLayout>
