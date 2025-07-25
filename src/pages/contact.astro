@@ -3,6 +3,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 const pageTitle = "Contact Us";
 const pageDescription = "Have a question, feedback, or a suggestion? Get in touch with the CipherFlow team. We'd love to hear from you.";
+
+// This base variable is crucial for the form's action path
+const base = import.meta.env.BASE_URL;
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
@@ -13,34 +16,41 @@ const pageDescription = "Have a question, feedback, or a suggestion? Get in touc
     </header>
 
     <div class="max-w-xl mx-auto">
+      
+      <!-- 
+        =====================================================================
+        This is the failsafe "blueprint" form for Netlify's build bots.
+        It is hidden from users and ensures Netlify detects the form correctly,
+        even with modern frameworks like Astro.
+        =====================================================================
+      -->
+      <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+        <input type="text" name="name" />
+        <input type="email" name="email" />
+        <textarea name="message"></textarea>
+      </form>
 
       <!-- 
         =====================================================================
-        This is the ONE AND ONLY form. It is visible and has ALL required attributes.
+        This is the VISIBLE form for users.
+        It has the CORRECT action path.
         =====================================================================
       -->
       <form 
         name="contact" 
         method="POST" 
-        action="/thank-you"
-        data-netlify="true" 
+        data-netlify="true"  
         data-netlify-honeypot="bot-field"
+        action=`${base}/thank-you`
+        
         class="space-y-6"
       >
-        {/* 
-          This hidden input is a failsafe. Netlify injects this, but adding it
-          manually makes the form's intent crystal clear to the build bots.
-        */}
-        <input type="hidden" name="form-name" value="contact" />
-        
-        {/* The hidden honeypot field for spam protection. */}
         <p class="hidden">
           <label>
             Don’t fill this out if you’re human: <input name="bot-field" />
           </label>
         </p>
 
-        {/* --- Visible Form Fields --- */}
         <div>
           <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
           <div class="mt-1">
