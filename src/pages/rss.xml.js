@@ -1,28 +1,36 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
-import { blogUtils } from '../content/config'; // Assuming your utils are here
+import { blogUtils } from '../content/config'; // Make sure this path is correct
 
-export async function GET(context) {
+// We get the site URL from the environment variables provided by Astro
+const site = import.meta.env.SITE;
+
+export async function GET() {
   const allPosts = await getCollection('blog');
+  
+  // Make sure to filter out drafts so they don't appear in the feed
   const publishedPosts = blogUtils.filterPublished(allPosts);
   const sortedPosts = blogUtils.sortByDate(publishedPosts);
 
   return rss({
-    // `<title>` field in output xml
-    title: 'CipherFlow Blog',
-    // `<description>` field in output xml
-    description: 'Learn how modern encryption works through clear, step-by-step visualizations.',
-    // Base URL of your site
-    site: context.site,
-    // List of `<item>`s in output xml
+    // The title of your RSS feed
+    title: 'CipherFlow | Blog',
+    
+    // A description of your RSS feed
+    description: 'The latest articles, guides, and tutorials on cryptography and data security from CipherFlow.',
+    
+    // The full URL of your website
+    site: site,
+    
+    // The list of items for your RSS feed
     items: sortedPosts.map((post) => ({
       title: post.data.title,
       pubDate: post.data.pubDate,
       description: post.data.description,
-      // The full link to the post
-      link: `/blog/${post.slug}/`,
+      // Creates the full, valid link to the post. Example: https://powergr.github.io/cipherflow-visualizer/blog/blake23-hash/
+      link: `${site}/blog/${post.slug}/`,
     })),
-    // Optional: Custom XML stylesheet
-    stylesheet: '/rss/styles.xsl',
+    
+    // (Optional) We are removing the custom stylesheet link to prevent build errors.
   });
 }
