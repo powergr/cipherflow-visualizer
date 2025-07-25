@@ -46,27 +46,42 @@ const base = import.meta.env.BASE_URL;
     </div>
   </div>
 
-  <script define:vars={{ base }}>
+ <script define:vars={{ base }}>
     const form = document.querySelector('form[name="contact"]');
+    
     form.addEventListener('submit', async (event) => {
-      event.preventDefault();
+      event.preventDefault(); // Stop the browser from navigating
+
       const submitButton = form.querySelector('button[type="submit"]');
+      const originalButtonText = submitButton.innerHTML;
       submitButton.disabled = true;
       submitButton.innerHTML = 'Sending...';
 
       const formData = new FormData(form);
+
       try {
-        await fetch('/', { // The path here doesn't matter as much as the content
+        const response = await fetch('/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams(formData).toString()
         });
-        window.location.href = `${base}/thank-you`; // Manually redirect on success
+
+        // --- NEW: Check if the server response was actually successful ---
+        if (response.ok) {
+          alert("Success! We will now redirect."); // Show a success message for now
+          // --- TEMPORARILY DISABLED: This is the redirect we need to stop ---
+          // window.location.href = `${base}/thank-you`;
+        } else {
+          // If the server responded with an error (like 405), throw an error to be caught below
+          throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+        }
+        
       } catch (error) {
         console.error('Form submission error:', error);
-        alert('Sorry, there was an error submitting your form.');
+        // --- NEW: Show a more detailed error message to the user ---
+        alert(`Sorry, there was an error submitting your form. Please open the developer console to see the details. Error: ${error.message}`);
         submitButton.disabled = false;
-        submitButton.innerHTML = 'Send Message';
+        submitButton.innerHTML = originalButtonText;
       }
     });
   </script>
