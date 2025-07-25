@@ -9,6 +9,7 @@ thumbnail: "./images/EdDSA.jpg"
 thumbnailAlt: "A visual representation of the EdDSA Protocol."
 visualizer: "EdDSAVisualizer"
 tags: ["Digital Signature", "EdDSA", "Asymmetric Encryption", "Cryptography"]
+draft: false
 ---
 An in-depth exploration of the Edwards-curve Digital Signature Algorithm (EdDSA), a state-of-the-art cryptographic method for ensuring data integrity and authenticity.
 

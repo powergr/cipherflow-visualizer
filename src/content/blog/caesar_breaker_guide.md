@@ -10,6 +10,7 @@ thumbnailAlt: "Breaking the Caesar Cipher with A Python Script"
 cover: "./images/caesar-breaker.jpg"
 coverAlt: "Breaking the Caesar Cipher with A Python Script"
 tags: ["Cryptanalysis", "Frequency Analysis", "Caesar Cipher", "Classic Cipher"]
+draft: false
 ---
 
 ## Breaking the Caesar Cipher: A Python Journey from Comprehensive to Concise

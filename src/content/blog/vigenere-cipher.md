@@ -9,6 +9,8 @@ thumbnail: "./images/vigenere-cipher.jpg"
 thumbnailAlt: "A visual representation of the Vigenère Cipher Algorithm"
 visualizer: "VigenereVisualizer"
 tags: ["Classic Cipher", "Vigenère Cipher", "Encryption", "Polyalphabetic Cipher"]
+draft: false
+
 ---
 ## The Vigenère Cipher: A Journey Through History and Modern Applications
 

@@ -9,6 +9,7 @@ thumbnail: "./images/caesar-cipher.jpg"
 thumbnailAlt: "A visual representation of the Caesar Cipher Algorithm"
 visualizer: "CaesarVisualizer"
 tags: ["Classic Cipher", "Caesar Cipher", "Encryption", "Cryptography"]
+draft: false
 ---
 
 ## The Caesar Cipher: A Journey Through Ancient Cryptography

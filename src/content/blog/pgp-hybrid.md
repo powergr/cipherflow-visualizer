@@ -9,6 +9,7 @@ thumbnail: "./images/pgp-hybrid.jpg"
 thumbnailAlt: "A visual representation of the PGP algorithm."
 visualizer: "PGPVisualizer"
 tags: ["PGP", "Hybrid Encryption", "Email Security", "Cryptography"]
+draft: false
 ---
 
 ## Understanding PGP (Pretty Good Privacy): Hybrid Encryption for Secure Messaging and Data

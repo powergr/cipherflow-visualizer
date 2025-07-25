@@ -9,6 +9,7 @@ thumbnail: "./images/hill-cipher.jpg"
 thumbnailAlt: "A visual representation of the Hill Cipher Algorithm"
 visualizer: "HillVisualizer"
 tags: ["Classic Cipher", "Hill Cipher", "Linear Algebra", "Encryption"]
+draft: false
 ---
 
 ## The Hill Cipher: Mathematical Elegance in Classical Cryptography

@@ -9,7 +9,9 @@ thumbnail: "./images/tls.jpg"
 thumbnailAlt: "A visual representation of the TLS Protocol"
 visualizer: "TlsVisualizer"
 tags: ["TLS", "Web Security", "HTTPS", "Cryptography", "Network Security"]
+draft: false
 ---
+
 ## Understanding TLS: The Backbone of Secure Internet Communication
 
 **Transport Layer Security (TLS)** is the world's most widely used protocol for securing communications over networks, especially the Internet. It uses hybrid encryption—combining asymmetric (public-key) and symmetric cryptography—to provide privacy, integrity, and authentication between clients and servers. This comprehensive educational article explores TLS's history, protocol workings, its strengths, why it's the standard for secure communication, implementation details, and the latest developments.

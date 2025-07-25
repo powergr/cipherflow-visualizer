@@ -9,6 +9,7 @@ thumbnail: "./images/blake23.jpg"
 thumbnailAlt: "A visual representation of the BLAKE3 hashing algorithm."
 visualizer: "Blake3Visualizer"
 tags: ["Hashing", "BLAKE3", "Cryptography", "Hash Function"]
+draft: false
 ---
 
 ## Understanding BLAKE2 and BLAKE3: Modern, Fast, and Secure Hash Functions
