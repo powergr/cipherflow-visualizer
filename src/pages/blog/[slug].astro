@@ -14,6 +14,8 @@ import SHA3Visualizer from '../../components/visualizers/SHA3Visualizer.astro';
 import Blake3Visualizer from '../../components/visualizers/Blake3Visualizer.astro';
 import PGPVisualizer from '../../components/visualizers/PGPVisualizer.astro';
 import SignalVisualizer from '../../components/visualizers/SignalVisualizer.astro';
+import TlsVisualizer from '../../components/visualizers/TlsVisualizer.astro';
+import EdDSAVisualizer from '../../components/visualizers/EdDSAVisualizer.astro';
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection('blog');
@@ -193,6 +195,24 @@ const socialImageUrl = socialImage || (cover ? cover.src : undefined) || '/image
         Interactive Signal Visualizer
       </h2>
       <SignalVisualizer />
+    </div>
+  )}
+
+                     {entry.data.visualizer === 'TlsVisualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive TLS Visualizer
+      </h2>
+      <TlsVisualizer />
+    </div>
+  )}
+
+                       {entry.data.visualizer === 'EdDSAVisualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive EdDSA Visualizer
+      </h2>
+      <EdDSAVisualizer />
     </div>
   )}
 

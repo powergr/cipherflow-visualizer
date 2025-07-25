@@ -1,0 +1,304 @@
+---
+// src/components/visualizers/EdDSAVisualizer.astro
+
+import VisualizerLayout from "./VisualizerLayout.astro";
+
+const title = "🧮 EdDSA (Ed25519) Visualizer";
+const uniqueId = "eddsa-visualizer";
+---
+
+<VisualizerLayout {title} {uniqueId}>
+  {/* The main controls for the visualizer */}
+  <div slot="controls" class="control-group">
+    <label for="message">Message:</label>
+    <input type="text" id="message" value="Hello EdDSA" style="width: 250px;" />
+  </div>
+
+  {/* Action buttons to trigger signing and verification */}
+  <div slot="actions">
+    <button id="sign-btn">✍️ Sign Message</button>
+    <button id="verify-btn" disabled>✅ Verify Signature</button>
+  </div>
+
+  {/* 
+    The main visualization panel. 
+    The "Verified Message" has been removed from the third box.
+  */}
+  <div slot="visualization-panel">
+    <div class="panel">
+      <div class="box">
+        <div class="box-title">1. Key Generation</div>
+        <div class="value-box">
+          <div class="value-label">Public Key (Base64):</div>
+          <div class="value" id="public-key"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <div class="box-title">2. Signature</div>
+        <div class="value-box">
+          <div class="value-label">Message Digest (SHA-256):</div>
+          <div class="value" id="hashed-msg"></div>
+        </div>
+        <div class="value-box">
+          <div class="value-label">Signature (Base64):</div>
+          <div class="value" id="signature"></div>
+        </div>
+      </div>
+
+      <div class="box">
+        <div class="box-title">3. Verification</div>
+        <div class="value-box">
+          <div class="value-label">Verification Result:</div>
+          <div class="value" id="verification-result"></div>
+        </div>
+        <!-- The "Verified Message" box is now removed from here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- The "text-display" slot is now used for the final verified message -->
+  <div slot="text-display" id="verified-output">
+    <!-- The script will populate this area -->
+  </div>
+
+  {/* Load the D3.js library required for animations */}
+  <script slot="script" is:inline src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  
+  {/* The core logic for the EdDSA visualizer */}
+  <script slot="script" is:inline define:vars={{ uniqueId }}>
+    class RealEdDSAVisualizer {
+      constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        if (!this.container) {
+          console.error(`Visualizer container with ID #${containerId} not found.`);
+          return;
+        }
+
+        this.msgIn = this.container.querySelector('#message');
+        this.signBtn = this.container.querySelector('#sign-btn');
+        this.verifyBtn = this.container.querySelector('#verify-btn');
+        this.stepInfo = this.container.querySelector('.step-info');
+
+        this.val = {
+          pub: this.container.querySelector('#public-key'),
+          hash: this.container.querySelector('#hashed-msg'),
+          sig: this.container.querySelector('#signature'),
+          result: this.container.querySelector('#verification-result'),
+          // 'message' element is no longer part of the verification box
+        };
+        
+        // NEW: A reference to the large text display at the bottom
+        this.verifiedOutput = this.container.querySelector('#verified-output');
+
+        this.keys = {};
+        this.signature = null;
+        this.message = null;
+        
+        this.setup();
+      }
+
+      setup() {
+        this.signBtn.addEventListener('click', () => this.signMessage());
+        this.verifyBtn.addEventListener('click', () => this.verifySignature());
+        this.stepInfo.textContent = 'Enter a message and click "Sign Message".';
+      }
+
+      async signMessage() {
+        this.reset();
+        const msg = this.msgIn.value.trim();
+        if (!msg) {
+          this.stepInfo.textContent = 'Please enter a message.';
+          return;
+        }
+
+        this.stepInfo.textContent = 'Generating Ed25519 key pair...';
+        try {
+            const keyPair = await crypto.subtle.generateKey(
+              { name: "Ed25519" },
+              true,
+              ["sign", "verify"]
+            );
+
+            this.keys = keyPair;
+
+            const pubKeyRaw = await crypto.subtle.exportKey("raw", keyPair.publicKey);
+            const pubKeyB64 = btoa(String.fromCharCode(...new Uint8Array(pubKeyRaw)));
+            this.val.pub.textContent = pubKeyB64;
+            await this.highlight(this.val.pub.closest('.box'));
+
+            this.stepInfo.textContent = 'Hashing the message (SHA-256)...';
+            const encoder = new TextEncoder();
+            const data = encoder.encode(msg);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+            this.val.hash.textContent = hashHex;
+            await this.highlight(this.val.hash.closest('.box'));
+
+            this.stepInfo.textContent = 'Signing the message hash...';
+            const signature = await crypto.subtle.sign("Ed25519", keyPair.privateKey, data);
+            const sigB64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
+            this.signature = signature;
+            this.message = data;
+
+            this.val.sig.textContent = sigB64;
+            await this.highlight(this.val.sig.closest('.box'));
+
+            this.stepInfo.textContent = 'Signature generated. Ready to verify.';
+            this.verifyBtn.disabled = false;
+        } catch (error) {
+            console.error("Signing Error:", error);
+            this.stepInfo.textContent = `Error: ${error.message}`;
+        }
+      }
+
+      async verifySignature() {
+        if (!this.keys.publicKey || !this.signature || !this.message) {
+            this.stepInfo.textContent = 'Please sign a message first.';
+            return;
+        }
+
+        this.stepInfo.textContent = 'Verifying signature...';
+        try {
+            const valid = await crypto.subtle.verify("Ed25519", this.keys.publicKey, this.signature, this.message);
+            this.val.result.textContent = valid ? "✅ Signature Verified!" : "❌ Signature Invalid!";
+            await this.highlight(this.val.result.closest('.box'), valid);
+
+            if (valid) {
+              const decoded = new TextDecoder().decode(this.message);
+              // Set the text content of the large display area
+              this.verifiedOutput.textContent = `"${decoded}"`;
+              this.stepInfo.textContent = 'Verification successful!';
+            } else {
+              // Clear the large display area on failure
+              this.verifiedOutput.textContent = '';
+              this.stepInfo.textContent = 'Verification failed!';
+            }
+        } catch (error) {
+            console.error("Verification Error:", error);
+            this.stepInfo.textContent = `Error: ${error.message}`;
+        }
+      }
+
+      reset() {
+        // Clear all dynamic text content
+        Object.values(this.val).forEach(el => { if(el) el.textContent = ''; });
+        if(this.verifiedOutput) this.verifiedOutput.textContent = ''; // Clear the bottom display
+        
+        // Use d3 to remove styling classes from elements within this component's container
+        d3.select(this.container).selectAll('.box')
+            .style('border', '2px solid transparent')
+            .style('transform', 'scale(1.0)')
+            .style('box-shadow', '0 4px 12px rgba(0,0,0,0.2)');
+        
+        this.verifyBtn.disabled = true;
+        this.stepInfo.textContent = 'Enter a message and click "Sign Message".';
+      }
+
+      async highlight(element, isFinal = false) {
+        const d3Element = d3.select(element);
+        
+        d3Element.transition().duration(300)
+            .style('transform', 'scale(1.03)')
+            .style('box-shadow', '0 0 15px #ffeb3b');
+            
+        await new Promise(res => setTimeout(res, 600));
+
+        if (isFinal) {
+          // Apply a persistent success style for the final, valid step
+          d3Element.style('border', '2px solid #51cf66')
+                   .style('transform', 'scale(1.0)') // return to normal size
+                   .style('box-shadow', '0 0 15px #51cf66');
+        } else {
+          // Transition back for intermediate steps
+          d3Element.transition().duration(300)
+              .style('transform', 'scale(1.0)')
+              .style('box-shadow', '0 4px 12px rgba(0,0,0,0.2)');
+        }
+      }
+    }
+
+    function initializeVisualizer() {
+        new RealEdDSAVisualizer(uniqueId);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeVisualizer);
+    } else {
+        initializeVisualizer();
+    }
+  </script>
+</VisualizerLayout>
+
+<style>
+  .panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .box {
+    background: rgba(0, 0, 0, 0.15);
+    flex: 1;
+    min-width: 280px;
+    max-width: 320px;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+  }
+
+  .box-title {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 15px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+  }
+
+  .value-box {
+    margin: 15px 0;
+  }
+
+  .value-label {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-bottom: 5px;
+  }
+
+  .value {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    word-break: break-all;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+
+  /* Style for the newly added text display area for better visibility */
+  #verified-output {
+    font-family: 'Courier New', monospace;
+    font-size: 24px;
+    text-align: center;
+    margin: 20px 0;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    min-height: 60px;
+    width: 80%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    word-break: break-all;
+    color: #51cf66; /* Green text to signify success */
+    font-weight: bold;
+    border: 2px solid rgba(81, 207, 102, 0.5);
+  }
+</style>
