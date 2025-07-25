@@ -273,7 +273,7 @@ For password hashing, MD5 is vulnerable to:
 - Implement parallel hashing during transition
 - Update protocols and standards
 
-## Phase 3: Deprecation**
+## Phase 3: Deprecation
 
 - Remove MD5 from security-sensitive contexts
 - Maintain support for legacy compatibility only
