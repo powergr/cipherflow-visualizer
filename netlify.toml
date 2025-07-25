@@ -1,0 +1,7 @@
+# This is a Netlify configuration file
+
+# This tells Netlify where to redirect after a successful submission
+# for the form named "contact".
+[forms]
+  [forms.contact]
+    action = "/thank-you"

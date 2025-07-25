@@ -1,24 +1,21 @@
 ---
-// src/pages/thank-you.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const pageTitle = "Thank You!";
 const pageDescription = "We have received your message and will get back to you shortly.";
+const base = import.meta.env.BASE_URL;
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
   <div class="max-w-4xl mx-auto px-6 py-12 text-center">
     <header class="mb-8">
-      <svg class="w-16 h-16 mx-auto mb-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-      </svg>
+      <svg class="w-16 h-16 mx-auto mb-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
       <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Thank You!</h1>
       <p class="text-xl text-gray-600 dark:text-gray-300">Your message has been sent successfully.</p>
     </header>
-
     <div class="prose prose-lg prose-gray dark:prose-invert max-w-none mx-auto">
       <p>We appreciate you taking the time to contact us. We'll review your message and get back to you as soon as possible.</p>
-      <a href="/cipherflow-visualizer/blog" class="inline-block mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg no-underline hover:bg-blue-700 transition-colors">
+      <a href=`${base}/blog` class="inline-block mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg no-underline hover:bg-blue-700 transition-colors">
         Back to the Blog
       </a>
     </div>
