@@ -13,14 +13,8 @@ const pageDescription = "Have a question, feedback, or a suggestion? Get in touc
     </header>
 
     <div class="max-w-xl mx-auto">
-      {/* 
-        This form is now configured for Netlify.
-        - `name="contact"`: Identifies the form in your Netlify dashboard.
-        - `method="POST"`: Required for form submissions.
-        - `data-netlify="true"`: The magic attribute that tells Netlify to handle this form.
-        - `data-netlify-honeypot="bot-field"`: Enables spam protection.
-        - `action="/thank-you"`: Redirects users to your custom success page after submission.
-      */}
+      
+      <!-- START: Replace your form with this entire block -->
       <form 
         name="contact" 
         method="POST" 
@@ -29,10 +23,10 @@ const pageDescription = "Have a question, feedback, or a suggestion? Get in touc
         action="/thank-you"
         class="space-y-6"
       >
-        <!-- This hidden input is crucial for Netlify to correctly identify the form -->
+        {/* This hidden input is REQUIRED by Netlify to identify the form from the static HTML. */}
         <input type="hidden" name="form-name" value="contact" />
 
-        <!-- This is the "honeypot" field. It should be hidden from users. Bots will fill it out, and Netlify will mark the submission as spam. -->
+        {/* This is the spam "honeypot" field. It should be hidden from users. */}
         <p class="hidden">
           <label>
             Don’t fill this out if you’re human: <input name="bot-field" />
@@ -66,6 +60,8 @@ const pageDescription = "Have a question, feedback, or a suggestion? Get in touc
           </button>
         </div>
       </form>
+      <!-- END: End of the replacement block -->
+
     </div>
   </div>
 </BaseLayout>
