@@ -1,20 +1,13 @@
 ---
 // src/components/BlogCard.astro
+import type { CollectionEntry } from 'astro:content';
 
-// Define the shape of the 'post' prop we expect
+// --- THIS IS THE FIX ---
+// Instead of a manual interface, we use CollectionEntry<'blog'>.
+// This is Astro's official type for a blog post, and it already knows
+// that 'image' is an object with a '.src' property from your config.ts!
 export interface Props {
-  post: {
-    slug: string;
-    data: {
-      title: string;
-      description: string;
-      pubDate: Date;
-      image?: string;
-      imageAlt?: string;
-      category?: string;
-      difficulty?: 'beginner' | 'intermediate' | 'advanced';
-    };
-  };
+  post: CollectionEntry<'blog'>;
 }
 
 const { post } = Astro.props;
@@ -37,18 +30,20 @@ const difficultyColors = {
 
 <article class="group flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
   <!-- Card Image -->
-  {post.data.image && (
-    <div class="overflow-hidden">
-      <a href=`${base}/blog/${post.slug}`>
-        <img 
-          src={post.data.image} 
-          alt={post.data.imageAlt || post.data.title}
-          class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-          loading="lazy"
-        />
-      </a>
-    </div>
-  )}
+  <!-- This code now works because TypeScript knows post.data.image is an object -->
+{post.data.thumbnail && (
+  // FIX #1: Added a background color to the 'frame' div
+  <div class="overflow-hidden bg-gray-200 dark:bg-gray-700">
+    <a href=`${base}/blog/${post.slug}`>
+      <img 
+        src={post.data.thumbnail.src} 
+        alt={post.data.thumbnailAlt || post.data.title}
+        class="w-full h-48 object-contain object-center transition-transform duration-300 group-hover:scale-105"
+        loading="lazy"
+      />
+    </a>
+  </div>
+)}
 
   <!-- Card Content -->
   <div class="p-6 flex flex-col flex-grow">

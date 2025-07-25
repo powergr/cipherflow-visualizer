@@ -5,6 +5,8 @@ difficulty: "beginner"
 pubDate: 2025-07-15
 author: "Pashalis Laoutaris"
 category: "Basic Classic Symmetric"
+thumbnail: "./images/hill-cipher.jpg"
+thumbnailAlt: "A visual representation of the Hill Cipher Algorithm"
 visualizer: "HillVisualizer"
 ---
 
@@ -27,6 +29,7 @@ Invented by mathematician Lester S. Hill in 1929, this cipher introduced the pow
 - [The Mathematical Legacy](#the-mathematical-legacy)
 - [Implementation Considerations](#implementation-considerations)
 - [Conclusion](#conclusion)
+- [FAQ](#faq)
 - [References](#references)
 
 ## Historical Background
@@ -246,6 +249,36 @@ For educators and students, the Hill cipher offers unique advantages in teaching
 The cipher's legacy extends beyond its direct applications, having influenced the development of modern block ciphers and contributed to our understanding of the importance of nonlinear operations in secure encryption. From its origins in Hill's 1929 innovation to its continued use in educational settings, the Hill cipher represents a crucial milestone in the ongoing story of secure communication.
 
 Whether implemented through mechanical devices like Hill's original "Message Protector" or modern computer programs, the Hill cipher continues to serve as an excellent introduction to the mathematical foundations of cryptography, ensuring its place as both a historical artifact and a valuable educational tool in the study of cryptographic systems.
+
+## FAQ
+
+### What is the Hill Cipher and how does it differ from simpler ciphers?
+
+The Hill Cipher is a polygraphic substitution cipher that uses matrix multiplication in modular arithmetic to encrypt blocks of letters simultaneously, unlike simpler ciphers like the Caesar Cipher, which shift individual letters. It relies on linear algebra, making it more mathematically sophisticated.
+
+### Why is the Hill Cipher considered insecure for modern use?
+
+The Hill Cipher is insecure due to its vulnerability to known plaintext attacks, where an attacker with matching plaintext-ciphertext pairs can solve for the key matrix. Its linear nature and limited key space (restricted to invertible matrices) also make it susceptible to algebraic and statistical attacks.
+
+### What mathematical knowledge is required to understand the Hill Cipher?
+
+Understanding the Hill Cipher requires basic knowledge of linear algebra, including matrix multiplication, matrix inverses, and determinants, as well as modular arithmetic (typically modulo 26 for the English alphabet). These concepts are used to perform encryption and decryption.
+
+### How is the Hill Cipher used in education?
+
+The Hill Cipher is widely used to teach linear algebra and cryptography concepts, such as matrix operations, modular arithmetic, and algorithm design. It provides a practical application for students to explore mathematical principles and understand cryptographic vulnerabilities.
+
+### What are the main vulnerabilities of the Hill Cipher?
+
+The Hill Cipher is primarily vulnerable to known plaintext attacks, where plaintext-ciphertext pairs reveal the key matrix. It is also susceptible to bigram/trigram frequency analysis, algebraic cryptanalysis, and brute-force attacks due to its limited key space.
+
+### Can the Hill Cipher be used for secure communication today?
+
+No, the Hill Cipher is not suitable for secure communication due to its mathematical weaknesses, particularly its susceptibility to known plaintext attacks and limited key space. Modern encryption requires more complex, nonlinear algorithms with larger key spaces.
+
+### How does the Hill Cipher relate to modern block ciphers?
+
+The Hill Cipher introduced the concept of processing multiple characters simultaneously, a foundational idea for modern block ciphers. However, modern block ciphers use nonlinear operations and larger key spaces to achieve security, unlike the Hill Cipher’s linear structure.
 
 ## References
 

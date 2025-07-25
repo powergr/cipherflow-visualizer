@@ -3,7 +3,7 @@ import { defineCollection, z, type CollectionEntry } from 'astro:content';
 
 const blogCollection = defineCollection({
   type: 'content',
-  schema: z.object({
+  schema: ({ image }) => z.object({
     // Required fields
     title: z.string().min(1, 'Title is required'),
     description: z.string().min(1, 'Description is required'),
@@ -11,8 +11,10 @@ const blogCollection = defineCollection({
     author: z.string().min(1, 'Author is required'),
     
     // Optional fields
-    image: z.string().optional(),
-    imageAlt: z.string().optional(),
+    cover: image().optional(),
+    coverAlt: z.string().optional(),
+    thumbnail: image().optional(),
+    thumbnailAlt: z.string().optional(),
     tags: z.array(z.string()).default([]),
     category: z.string().optional(),
     readTime: z.number().positive().optional(),

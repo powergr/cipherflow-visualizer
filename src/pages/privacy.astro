@@ -1,13 +1,41 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const pageTitle = "Privacy Policy";
+const pageDescription = "Your privacy is important to us. This Privacy Policy explains how CipherFlow collects, uses, and protects your personal information.";
 ---
-<BaseLayout title="Privacy Policy" description="Privacy Policy for CipherFlow.">
-  <div class="container mx-auto px-6 py-16">
-    <div class="max-w-3xl mx-auto">
-      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-6">Privacy Policy</h1>
-      <div class="prose dark:prose-invert max-w-none">
-        <p>This page is under construction. Our full Privacy Policy will be detailed here soon.</p>
-      </div>
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <div class="max-w-4xl mx-auto px-6 py-12">
+    <header class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Privacy Policy</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Last Updated: July 20, 2025</p>
+    </header>
+
+    <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+      <p>Your privacy is important to us. It is CipherFlow's policy to respect your privacy regarding any information we may collect from you across our website.</p>
+      
+      <h3>1. Information We Collect</h3>
+      <p>We only ask for personal information when we truly need it to provide a service to you (for example, if you subscribe to our newsletter or use our contact form). We collect it by fair and lawful means, with your knowledge and consent. We also let you know why we’re collecting it and how it will be used.</p>
+
+      <h3>2. How We Use Your Information</h3>
+      <p>We may use the information we collect in various ways, including to:</p>
+      <ul>
+        <li>Provide, operate, and maintain our website.</li>
+        <li>Improve, personalize, and expand our website.</li>
+        <li>Understand and analyze how you use our website.</li>
+        <li>Communicate with you, either directly or through one of our partners, for customer service, to provide you with updates and other information relating to the website.</li>
+        <li>Send you emails.</li>
+      </ul>
+
+      <h3>3. Log Files and Analytics</h3>
+      <p>CipherFlow follows a standard procedure of using log files and analytics services (e.g., Google Analytics). These files log visitors when they visit websites. The information collected includes IP addresses, browser type, date and time stamp, referring/exit pages, and possibly the number of clicks. This information is used to analyze trends, administer the site, and gather demographic information. This data is not linked to any information that is personally identifiable.</p>
+      
+      <h3>4. Third-Party Privacy Policies</h3>
+      <p>CipherFlow's Privacy Policy does not apply to other advertisers or websites. Thus, we are advising you to consult the respective Privacy Policies of these third-party ad servers for more detailed information.</p>
+      
+      <h3>5. Changes to This Privacy Policy</h3>
+      <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.</p>
     </div>
   </div>
 </BaseLayout>

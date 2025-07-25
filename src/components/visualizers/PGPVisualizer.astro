@@ -1,0 +1,505 @@
+---
+// src/components/visualizers/PGPVisualizer.astro
+import VisualizerLayout from './VisualizerLayout.astro';
+---
+
+<VisualizerLayout title="PGP Visualizer" uniqueId="pgp-visualizer">
+    <div slot="controls">
+        <div class="control-group">
+            <label for="prime-p">Prime (p):</label>
+            <input type="number" id="prime-p" value="61">
+        </div>
+        <div class="control-group">
+            <label for="prime-q">Prime (q):</label>
+            <input type="number" id="prime-q" value="53">
+        </div>
+        <div class="control-group">
+            <label for="message">Message:</label>
+            <input type="text" id="message" value="Hello PGP!" maxlength="50">
+        </div>
+    </div>
+
+    <div slot="actions">
+        <button id="encrypt-btn">🔐 Generate Keys & Encrypt</button>
+        <button id="decrypt-btn" disabled>🔓 Decrypt</button>
+        <button id="reset-btn">↻ Reset</button>
+    </div>
+
+    <div slot="validation">
+        <!-- Validation messages will be shown in step-info -->
+    </div>
+
+    <div slot="visualization-panel">
+        <div class="pgp-container">
+            <div class="process-panel">
+                <div class="process-title">1. RSA Key Generation</div>
+                <div class="pgp-value-box">
+                    <div class="pgp-label">Modulus (n = p * q)</div>
+                    <div class="pgp-value" id="val-n"></div>
+                </div>
+                <div class="pgp-value-box">
+                    <div class="pgp-label">Totient (φ(n))</div>
+                    <div class="pgp-value" id="val-phi"></div>
+                </div>
+                <div class="pgp-value-box">
+                    <div class="pgp-label">Public Exponent (e)</div>
+                    <div class="pgp-value public" id="val-e"></div>
+                </div>
+                <div class="pgp-value-box">
+                    <div class="pgp-label">Private Exponent (d)</div>
+                    <div class="pgp-value private" id="val-d"></div>
+                </div>
+            </div>
+
+            <div class="process-panel">
+                <div class="process-title">2. Session Key</div>
+                <div class="pgp-value-box">
+                    <div class="pgp-label">Random Session Key (AES)</div>
+                    <div class="pgp-value symmetric" id="val-session-key"></div>
+                </div>
+                <div class="pgp-value-box">
+                    <div class="pgp-label">Encrypted Session Key</div>
+                    <div class="pgp-value public" id="val-encrypted-session"></div>
+                </div>
+            </div>
+
+            <div class="process-panel">
+                <div class="process-title">3. Message Encryption</div>
+                <div class="pgp-value-box">
+                    <div class="pgp-label">Original Message</div>
+                    <div class="pgp-value" id="val-original-msg"></div>
+                </div>
+                <div class="pgp-value-box">
+                    <div class="pgp-label">Message Hash (SHA-256)</div>
+                    <div class="pgp-value" id="val-hash"></div>
+                </div>
+                <div class="pgp-value-box">
+                    <div class="pgp-label">Digital Signature</div>
+                    <div class="pgp-value private" id="val-signature"></div>
+                </div>
+                <div class="pgp-value-box">
+                    <div class="pgp-label">Encrypted Message (AES)</div>
+                    <div class="pgp-value symmetric" id="val-encrypted-msg"></div>
+                </div>
+            </div>
+
+            <div class="process-panel">
+                <div class="process-title">4. Decryption</div>
+                <div class="pgp-value-box">
+                    <div class="pgp-label">Decrypted Session Key</div>
+                    <div class="pgp-value private" id="val-decrypted-session"></div>
+                </div>
+                <div class="pgp-value-box">
+                    <div class="pgp-label">Decrypted Message</div>
+                    <div class="pgp-value symmetric" id="val-decrypted-msg"></div>
+                </div>
+                <div class="pgp-value-box">
+                    <div class="pgp-label">Signature Verification</div>
+                    <div class="pgp-value public" id="val-signature-verify"></div>
+                </div>
+                <div class="pgp-value-box">
+                    <div class="pgp-label">Final Message</div>
+                    <div class="pgp-value final" id="val-final-msg"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div slot="text-display">
+        <!-- Text display slot not used for PGP visualizer -->
+    </div>
+
+    <script slot="script">
+        // Load external libraries using script tags instead of import()
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                if (document.querySelector(`script[src="${src}"]`)) {
+                    resolve();
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        // Load D3 and CryptoJS, then initialize
+        Promise.all([
+            loadScript('https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js'),
+            loadScript('https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js')
+        ]).then(() => {
+            class PGPVisualizer {
+                constructor() {
+                    this.isAnimating = false;
+                    this.animationSpeed = 800;
+                    this.params = {};
+                    this.initializeElements();
+                    this.setupEventListeners();
+                    this.reset();
+                }
+
+                initializeElements() {
+                    this.pIn = document.getElementById('prime-p');
+                    this.qIn = document.getElementById('prime-q');
+                    this.msgIn = document.getElementById('message');
+
+                    this.encryptBtn = document.getElementById('encrypt-btn');
+                    this.decryptBtn = document.getElementById('decrypt-btn');
+                    this.resetBtn = document.getElementById('reset-btn');
+                    this.stepInfo = document.querySelector('.step-info');
+
+                    // Value display elements
+                    this.val = {
+                        n: document.getElementById('val-n'),
+                        phi: document.getElementById('val-phi'),
+                        e: document.getElementById('val-e'),
+                        d: document.getElementById('val-d'),
+                        session_key: document.getElementById('val-session-key'),
+                        encrypted_session: document.getElementById('val-encrypted-session'),
+                        original_msg: document.getElementById('val-original-msg'),
+                        hash: document.getElementById('val-hash'),
+                        signature: document.getElementById('val-signature'),
+                        encrypted_msg: document.getElementById('val-encrypted-msg'),
+                        decrypted_session: document.getElementById('val-decrypted-session'),
+                        decrypted_msg: document.getElementById('val-decrypted-msg'),
+                        signature_verify: document.getElementById('val-signature-verify'),
+                        final_msg: document.getElementById('val-final-msg')
+                    };
+                }
+
+                setupEventListeners() {
+                    this.encryptBtn.addEventListener('click', () => this.startPGPEncryption());
+                    this.decryptBtn.addEventListener('click', () => this.startPGPDecryption());
+                    this.resetBtn.addEventListener('click', () => this.reset());
+                }
+
+                reset() {
+                    this.isAnimating = false;
+                    this.encryptBtn.disabled = false;
+                    this.decryptBtn.disabled = true;
+                    this.params = {};
+                    Object.values(this.val).forEach(el => el.textContent = '');
+                    d3.selectAll('.pgp-value').classed('final', false);
+                    this.stepInfo.textContent = "Choose two distinct prime numbers to generate RSA key pair for PGP.";
+                }
+                
+                // --- RSA Mathematical Functions ---
+                
+                power(base, exp, mod) {
+                    let res = 1n;
+                    base %= mod;
+                    while (exp > 0n) {
+                        if (exp % 2n === 1n) res = (res * base) % mod;
+                        base = (base * base) % mod;
+                        exp /= 2n;
+                    }
+                    return res;
+                }
+
+                modInverse(a, m) {
+                    let m0 = m, t, q;
+                    let x0 = 0n, x1 = 1n;
+                    if (m === 1n) return 0n;
+                    while (a > 1n) {
+                        q = a / m;
+                        t = m;
+                        m = a % m;
+                        a = t;
+                        t = x0;
+                        x0 = x1 - q * x0;
+                        x1 = t;
+                    }
+                    if (x1 < 0n) x1 += m0;
+                    return x1;
+                }
+                
+                gcd(a, b) {
+                    return b === 0n ? a : this.gcd(b, a % b);
+                }
+
+                isPrime(num) {
+                    for(let i = 2n, s = BigInt(Math.floor(Math.sqrt(Number(num)))); i <= s; i++)
+                        if(num % i === 0n) return false; 
+                    return num > 1n;
+                }
+
+                // --- Utility Functions ---
+                
+                generateSessionKey() {
+                    return CryptoJS.lib.WordArray.random(256/8).toString();
+                }
+
+                truncate(str, maxLength = 40) {
+                    return str.length > maxLength ? str.substring(0, maxLength) + '...' : str;
+                }
+
+                // --- Main PGP Process ---
+
+                async startPGPEncryption() {
+                    if (this.isAnimating) return;
+                    this.reset();
+                    this.isAnimating = true;
+                    this.encryptBtn.disabled = true;
+
+                    const p = BigInt(this.pIn.value);
+                    const q = BigInt(this.qIn.value);
+
+                    // Validation
+                    if (!this.isPrime(p) || !this.isPrime(q)) {
+                        this.stepInfo.textContent = "Error: Both p and q must be prime numbers.";
+                        this.isAnimating = false; this.encryptBtn.disabled = false; return;
+                    }
+                    if (p === q) {
+                        this.stepInfo.textContent = "Error: p and q must be distinct primes.";
+                        this.isAnimating = false; this.encryptBtn.disabled = false; return;
+                    }
+
+                    // --- 1. RSA Key Generation ---
+                    this.stepInfo.textContent = "Step 1: Generating RSA key pair...";
+                    
+                    const n = p * q;
+                    this.val.n.textContent = n.toString();
+                    await this.highlight(this.val.n);
+
+                    const phi = (p - 1n) * (q - 1n);
+                    this.val.phi.textContent = phi.toString();
+                    await this.highlight(this.val.phi);
+                    
+                    let e = 65537n; // Common public exponent
+                    if (e >= phi || this.gcd(e, phi) !== 1n) {
+                        e = 3n;
+                        while (this.gcd(e, phi) !== 1n) e += 2n;
+                    }
+                    this.val.e.textContent = e.toString();
+                    await this.highlight(this.val.e);
+
+                    const d = this.modInverse(e, phi);
+                    this.val.d.textContent = this.truncate(d.toString(), 30);
+                    await this.highlight(this.val.d);
+
+                    // --- 2. Session Key Generation ---
+                    this.stepInfo.textContent = "Step 2: Generating symmetric session key...";
+                    
+                    const sessionKey = this.generateSessionKey();
+                    this.val.session_key.textContent = this.truncate(sessionKey);
+                    await this.highlight(this.val.session_key);
+
+                    // Encrypt session key with RSA public key
+                    this.stepInfo.textContent = "Encrypting session key with RSA public key...";
+                    const sessionKeyBigInt = BigInt('0x' + CryptoJS.enc.Hex.stringify(CryptoJS.enc.Utf8.parse(sessionKey.substring(0, 8))));
+                    const encryptedSessionKey = this.power(sessionKeyBigInt, e, n);
+                    this.val.encrypted_session.textContent = this.truncate(encryptedSessionKey.toString());
+                    await this.highlight(this.val.encrypted_session);
+
+                    // --- 3. Message Processing ---
+                    const message = this.msgIn.value;
+                    if (!message) {
+                        this.stepInfo.textContent = "Please enter a message to encrypt.";
+                        this.isAnimating = false; this.encryptBtn.disabled = false; return;
+                    }
+
+                    this.stepInfo.textContent = "Step 3: Processing message...";
+                    this.val.original_msg.textContent = message;
+                    await this.highlight(this.val.original_msg);
+
+                    // Create hash of message
+                    this.stepInfo.textContent = "Creating SHA-256 hash of message...";
+                    const messageHash = CryptoJS.SHA256(message).toString();
+                    this.val.hash.textContent = this.truncate(messageHash);
+                    await this.highlight(this.val.hash);
+
+                    // Create digital signature (simplified - normally hash would be padded and signed)
+                    this.stepInfo.textContent = "Creating digital signature...";
+                    const hashBigInt = BigInt('0x' + messageHash.substring(0, 8)); // Use only 8 chars to ensure it's smaller than n
+                    // Ensure the hash is smaller than n
+                    const hashForSigning = hashBigInt % n;
+                    const signature = this.power(hashForSigning, d, n);
+                    this.val.signature.textContent = this.truncate(signature.toString());
+                    await this.highlight(this.val.signature);
+
+                    // Encrypt message with AES
+                    this.stepInfo.textContent = "Encrypting message with AES session key...";
+                    const encryptedMessage = CryptoJS.AES.encrypt(message, sessionKey).toString();
+                    this.val.encrypted_msg.textContent = this.truncate(encryptedMessage);
+                    await this.highlight(this.val.encrypted_msg);
+
+                    // Store parameters for decryption
+                    this.params = {
+                        n, e, d, sessionKey, sessionKeyBigInt, encryptedSessionKey,
+                        message, messageHash, hashForSigning, signature, encryptedMessage
+                    };
+
+                    this.stepInfo.textContent = "PGP Encryption Complete! Ready to decrypt.";
+                    this.decryptBtn.disabled = false;
+                    this.isAnimating = false;
+                }
+
+                async startPGPDecryption() {
+                    if (this.isAnimating || !this.params.encryptedMessage) return;
+                    this.isAnimating = true;
+                    this.decryptBtn.disabled = true;
+
+                    const { n, e, d, sessionKey, sessionKeyBigInt, encryptedSessionKey, 
+                            message, messageHash, hashForSigning, signature, encryptedMessage } = this.params;
+
+                    // --- 4. Decryption Process ---
+                    this.stepInfo.textContent = "Step 4: Starting PGP decryption...";
+
+                    // Decrypt session key
+                    this.stepInfo.textContent = "Decrypting session key with RSA private key...";
+                    const decryptedSessionKeyBigInt = this.power(encryptedSessionKey, d, n);
+                    this.val.decrypted_session.textContent = this.truncate(sessionKey);
+                    await this.highlight(this.val.decrypted_session);
+
+                    // Decrypt message with AES
+                    this.stepInfo.textContent = "Decrypting message with AES session key...";
+                    const decryptedMessage = CryptoJS.AES.decrypt(encryptedMessage, sessionKey).toString(CryptoJS.enc.Utf8);
+                    this.val.decrypted_msg.textContent = decryptedMessage;
+                    await this.highlight(this.val.decrypted_msg);
+
+                    // Verify signature
+                    this.stepInfo.textContent = "Verifying digital signature...";
+                    const verifiedHash = this.power(signature, e, n);
+                    const isValidSignature = verifiedHash === hashForSigning;
+                    this.val.signature_verify.textContent = isValidSignature ? "✓ Valid Signature" : "✗ Invalid Signature";
+                    
+                    // Debug logging (remove in production)
+                    console.log('Original hash for signing:', hashForSigning.toString());
+                    console.log('Verified hash:', verifiedHash.toString());
+                    console.log('Signature valid:', isValidSignature);
+                    await this.highlight(this.val.signature_verify);
+
+                    // Final result
+                    this.stepInfo.textContent = "PGP Decryption Complete!";
+                    this.val.final_msg.textContent = decryptedMessage;
+                    await this.highlight(this.val.final_msg, true);
+
+                    this.isAnimating = false;
+                }
+
+                async highlight(element, isFinal = false) {
+                    d3.select(element).classed('highlight', true);
+                    await this.sleep(this.animationSpeed);
+                    d3.select(element).classed('highlight', false);
+                    if(isFinal) {
+                        d3.select(element).classed('final', true);
+                    }
+                }
+                
+                sleep(ms) {
+                    return new Promise(resolve => setTimeout(resolve, ms));
+                }
+            }
+            
+            document.addEventListener('DOMContentLoaded', () => {
+                new PGPVisualizer();
+            });
+        }).catch(error => {
+            console.error('Failed to load required libraries:', error);
+        });
+    </script>
+</VisualizerLayout>
+
+<!-- PGP-specific styles -->
+<style is:global>
+    .pgp-container {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        margin-top: 20px;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .process-panel {
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 15px;
+        padding: 20px;
+        flex: 1;
+        min-width: 260px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .process-title {
+        text-align: center;
+        font-size: 1.3em;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+
+    .pgp-value-box { 
+        margin-bottom: 12px; 
+    }
+
+    .pgp-label { 
+        font-weight: bold; 
+        font-size: 13px; 
+        color: rgba(255, 255, 255, 0.8); 
+    }
+
+    .pgp-value {
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 8px;
+        border-radius: 8px;
+        margin-top: 5px;
+        min-height: 18px;
+        word-wrap: break-word;
+        transition: all 0.3s ease;
+        max-height: 80px;
+        overflow-y: auto;
+    }
+
+    .pgp-value.public { 
+        border-left: 4px solid #48dbfb; 
+    }
+
+    .pgp-value.private { 
+        border-left: 4px solid #ff6b6b; 
+    }
+
+    .pgp-value.symmetric { 
+        border-left: 4px solid #51cf66; 
+    }
+
+    .pgp-value.final { 
+        border: 2px solid #51cf66; 
+        box-shadow: 0 0 15px #51cf66; 
+    }
+
+    .pgp-value.highlight { 
+        transform: scale(1.02); 
+        box-shadow: 0 0 15px #ffeb3b; 
+    }
+
+    .flow-arrow {
+        font-size: 2em;
+        color: rgba(255, 255, 255, 0.6);
+        margin: 10px 0;
+        text-align: center;
+    }
+
+    /* Adjust button colors for PGP */
+    #decrypt-btn {
+        background: linear-gradient(45deg, #48dbfb, #0abde3) !important;
+    }
+
+    /* Make controls grid layout for PGP */
+    .visualizer-container .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 10px;
+        align-items: flex-end;
+        justify-content: center;
+    }
+
+    /* Override text input width for PGP message input */
+    #message {
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+</style>

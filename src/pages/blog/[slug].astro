@@ -8,6 +8,14 @@ import PlayfairVisualizer from '../../components/visualizers/PlayfairVisualizer.
 import RailFenceVisualizer from '../../components/visualizers/RailFenceVisualizer.astro';
 import VigenereVisualizer from '../../components/visualizers/VigenereVisualizer.astro';
 import MD5Visualizer from '../../components/visualizers/MD5Visualizer.astro';
+import SHA1Visualizer from '../../components/visualizers/SHA1Visualizer.astro';
+import SHA2Visualizer from '../../components/visualizers/SHA2Visualizer.astro';
+import SHA3Visualizer from '../../components/visualizers/SHA3Visualizer.astro';
+import Blake3Visualizer from '../../components/visualizers/Blake3Visualizer.astro';
+import PGPVisualizer from '../../components/visualizers/PGPVisualizer.astro';
+import SignalVisualizer from '../../components/visualizers/SignalVisualizer.astro';
+import TlsVisualizer from '../../components/visualizers/TlsVisualizer.astro';
+import EdDSAVisualizer from '../../components/visualizers/EdDSAVisualizer.astro';
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection('blog');
@@ -28,8 +36,8 @@ const {
   pubDate,
   updatedDate,
   author,
-  image,
-  imageAlt,
+  cover,
+  coverAlt,
   tags = [],
   category,
   readTime,
@@ -58,7 +66,7 @@ const calculatedReadTime = readTime || calculateReadTime(entry.body);
 
 const canonicalUrl = canonicalURL || new URL(Astro.url.pathname, Astro.site).href;
 
-const socialImageUrl = socialImage || image || '/images/default-blog-image.jpg';
+const socialImageUrl = socialImage || (cover ? cover.src : undefined) || '/images/default-blog-image.jpg';
 ---
 
 <BlogLayout
@@ -67,8 +75,8 @@ const socialImageUrl = socialImage || image || '/images/default-blog-image.jpg';
   pubDate={pubDate}
   updatedDate={updatedDate}
   author={author}
-  image={image}
-  imageAlt={imageAlt}
+  image={cover ? cover.src : undefined}
+  imageAlt={coverAlt}
   tags={tags}
   category={category}
   readTime={calculatedReadTime}
@@ -133,6 +141,78 @@ const socialImageUrl = socialImage || image || '/images/default-blog-image.jpg';
         Interactive MD-5 Hash Visualizer
       </h2>
       <MD5Visualizer />
+    </div>
+  )}
+
+         {entry.data.visualizer === 'SHA1Visualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive SHA-1 Hash Visualizer
+      </h2>
+      <SHA1Visualizer />
+    </div>
+  )}
+
+           {entry.data.visualizer === 'SHA2Visualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive SHA-2 Hash Visualizer
+      </h2>
+      <SHA2Visualizer />
+    </div>
+  )}
+
+             {entry.data.visualizer === 'SHA3Visualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive SHA-3 Hash Visualizer
+      </h2>
+      <SHA3Visualizer />
+    </div>
+  )}
+
+               {entry.data.visualizer === 'Blake3Visualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive BLAKE 3 Hash Visualizer
+      </h2>
+      <Blake3Visualizer />
+    </div>
+  )}
+
+                 {entry.data.visualizer === 'PGPVisualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive PGP Visualizer
+      </h2>
+      <PGPVisualizer />
+    </div>
+  )}
+
+                   {entry.data.visualizer === 'SignalVisualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive Signal Visualizer
+      </h2>
+      <SignalVisualizer />
+    </div>
+  )}
+
+                     {entry.data.visualizer === 'TlsVisualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive TLS Visualizer
+      </h2>
+      <TlsVisualizer />
+    </div>
+  )}
+
+                       {entry.data.visualizer === 'EdDSAVisualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive EdDSA Visualizer
+      </h2>
+      <EdDSAVisualizer />
     </div>
   )}
 

@@ -1,0 +1,557 @@
+---
+// src/components/visualizers/TlsVisualizer.astro
+import VisualizerLayout from "./VisualizerLayout.astro";
+---
+
+<VisualizerLayout
+  title="TLS Handshake Visualizer"
+  uniqueId="tls-visualizer"
+>
+  <div slot="controls">
+    <div class="control-group">
+      <label for="server-name">Server Name:</label>
+      <input type="text" id="server-name" value="example.com" />
+    </div>
+    <div class="control-group">
+      <label for="cipher-suite">Cipher Suite:</label>
+      <select id="cipher-suite">
+        <option value="TLS_AES_256_GCM_SHA384">TLS_AES_256_GCM_SHA384</option>
+        <option value="TLS_AES_128_GCM_SHA256">TLS_AES_128_GCM_SHA256</option>
+        <option value="TLS_CHACHA20_POLY1305_SHA256"
+          >TLS_CHACHA20_POLY1305_SHA256</option
+        >
+      </select>
+    </div>
+    <div class="control-group">
+      <label for="data-message">Data to Send:</label>
+      <input
+        type="text"
+        id="data-message"
+        value="GET / HTTP/1.1"
+        maxlength="50"
+      />
+    </div>
+  </div>
+
+  <div slot="actions">
+    <button id="handshake-btn">🤝 Start TLS Handshake</button>
+    <button id="data-exchange-btn" disabled>📡 Exchange Data</button>
+    <button id="reset-btn">↻ Reset</button>
+  </div>
+
+  <div slot="visualization-panel">
+    <div class="tls-container">
+      <div class="process-panel">
+        <div class="process-title">1. Client Hello</div>
+        <div class="tls-value-box">
+          <div class="tls-label">TLS Version</div>
+          <div class="tls-value client" id="val-tls-version"></div>
+        </div>
+        <div class="tls-value-box">
+          <div class="tls-label">Client Random</div>
+          <div class="tls-value client" id="val-client-random"></div>
+        </div>
+        <div class="tls-value-box">
+          <div class="tls-label">Session ID</div>
+          <div class="tls-value" id="val-session-id"></div>
+        </div>
+        <div class="tls-value-box">
+          <div class="tls-label">Supported Cipher Suites</div>
+          <div class="tls-value" id="val-cipher-suites"></div>
+        </div>
+      </div>
+
+      <div class="process-panel">
+        <div class="process-title">2. Server Response</div>
+        <div class="tls-value-box">
+          <div class="tls-label">Server Random</div>
+          <div class="tls-value server" id="val-server-random"></div>
+        </div>
+        <div class="tls-value-box">
+          <div class="tls-label">Selected Cipher Suite</div>
+          <div class="tls-value" id="val-selected-cipher"></div>
+        </div>
+        <div class="tls-value-box">
+          <div class="tls-label">Server Certificate</div>
+          <div class="tls-value server" id="val-server-cert"></div>
+        </div>
+        <div class="tls-value-box">
+          <div class="tls-label">Server Key Exchange</div>
+          <div class="tls-value server" id="val-server-key-exchange"></div>
+        </div>
+      </div>
+
+      <div class="process-panel">
+        <div class="process-title">3. Key Exchange</div>
+        <div class="tls-value-box">
+          <div class="tls-label">Client Key Exchange</div>
+          <div class="tls-value client" id="val-client-key-exchange"></div>
+        </div>
+        <div class="tls-value-box">
+          <div class="tls-label">Pre-Master Secret</div>
+          <div class="tls-value shared" id="val-premaster-secret"></div>
+        </div>
+        <div class="tls-value-box">
+          <div class="tls-label">Master Secret</div>
+          <div class="tls-value shared" id="val-master-secret"></div>
+        </div>
+        <div class="tls-value-box">
+          <div class="tls-label">Session Keys</div>
+          <div class="tls-value shared" id="val-session-keys"></div>
+        </div>
+      </div>
+
+      <div class="process-panel">
+        <div class="process-title">4. Data Exchange</div>
+        <div class="tls-value-box">
+          <div class="tls-label">Client Finished</div>
+          <div class="tls-value client" id="val-client-finished"></div>
+        </div>
+        <div class="tls-value-box">
+          <div class="tls-label">Server Finished</div>
+          <div class="tls-value server" id="val-server-finished"></div>
+        </div>
+        <div class="tls-value-box">
+          <div class="tls-label">Encrypted Data</div>
+          <div class="tls-value shared" id="val-encrypted-data"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div slot="text-display" class="final-message-container">
+    <div class="final-message-label">Decrypted Response:</div>
+    <div id="decrypted-response-output"></div>
+  </div>
+
+  <div slot="script">
+    <script
+      is:inline
+      src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script
+      is:inline
+      src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
+    ></script>
+    <script is:inline>
+      class TLSVisualizer {
+        constructor() {
+          this.isAnimating = false;
+          this.animationSpeed = 800;
+          this.handshakeComplete = false;
+          this.sessionKeys = null;
+          const container = document.getElementById("tls-visualizer");
+          this.initializeElements(container);
+          this.setupEventListeners();
+          this.reset();
+        }
+
+        initializeElements(container) {
+          this.serverNameIn = container.querySelector("#server-name");
+          this.cipherSuiteIn = container.querySelector("#cipher-suite");
+          this.dataMessageIn = container.querySelector("#data-message");
+          this.handshakeBtn = container.querySelector("#handshake-btn");
+          this.dataExchangeBtn = container.querySelector("#data-exchange-btn");
+          this.resetBtn = container.querySelector("#reset-btn");
+          this.stepInfo = container.querySelector(".step-info");
+          this.finalMessageContainer = container.querySelector(
+            ".final-message-container"
+          );
+
+          this.val = {
+            tls_version: container.querySelector("#val-tls-version"),
+            client_random: container.querySelector("#val-client-random"),
+            session_id: container.querySelector("#val-session-id"),
+            cipher_suites: container.querySelector("#val-cipher-suites"),
+            server_random: container.querySelector("#val-server-random"),
+            selected_cipher: container.querySelector("#val-selected-cipher"),
+            server_cert: container.querySelector("#val-server-cert"),
+            server_key_exchange: container.querySelector(
+              "#val-server-key-exchange"
+            ),
+            client_key_exchange: container.querySelector(
+              "#val-client-key-exchange"
+            ),
+            premaster_secret: container.querySelector("#val-premaster-secret"),
+            master_secret: container.querySelector("#val-master-secret"),
+            session_keys: container.querySelector("#val-session-keys"),
+            client_finished: container.querySelector("#val-client-finished"),
+            server_finished: container.querySelector("#val-server-finished"),
+            encrypted_data: container.querySelector("#val-encrypted-data"),
+            decrypted_response: container.querySelector(
+              "#decrypted-response-output"
+            ),
+          };
+        }
+
+        setupEventListeners() {
+          this.handshakeBtn.addEventListener("click", () =>
+            this.startTLSHandshake()
+          );
+          this.dataExchangeBtn.addEventListener("click", () =>
+            this.startDataExchange()
+          );
+          this.resetBtn.addEventListener("click", () => this.reset());
+        }
+
+        reset() {
+          this.isAnimating = false;
+          this.handshakeComplete = false;
+          this.sessionKeys = null;
+          this.handshakeBtn.disabled = false;
+          this.dataExchangeBtn.disabled = true;
+          Object.values(this.val).forEach((el) => {
+            if (el) {
+              el.textContent = "";
+              el.classList.remove("final");
+            }
+          });
+          if (this.finalMessageContainer) {
+            this.finalMessageContainer.classList.remove("visible");
+          }
+          this.stepInfo.textContent =
+            "Configure server name and cipher suite to begin TLS handshake simulation.";
+        }
+
+        generateRandom(bytes = 32) {
+          return CryptoJS.lib.WordArray.random(bytes).toString();
+        }
+
+        generateSessionId() {
+          return CryptoJS.lib.WordArray.random(32).toString().substring(0, 16);
+        }
+
+        truncate(str, maxLength = 40) {
+          if (!str) return "";
+          return str.length > maxLength
+            ? str.substring(0, maxLength) + "..."
+            : str;
+        }
+
+        generateCertificate(serverName) {
+          const certData = `-----BEGIN CERTIFICATE-----
+MIIDXTCCAkWgAwIBAgIJAKoK/heBjcOuMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV
+BAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBX
+aWRnaXRzIFB0eSBMdGQwHhcNMTQxMjE0MTIxNjEzWhcNMTUxMjE0MTIxNjEzWjBF
+MQswCQDVQQGEwJBVTETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwYSW50
+ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
+CgKCAQEAwU4/b2pjhBULmLBdF+yrxY4TzV7hFKczU7QkKdNNHTt3VPSyM7aKEL+v
+-----END CERTIFICATE-----`;
+          return this.truncate(certData.replace(/\n/g, " "), 50);
+        }
+
+        async startTLSHandshake() {
+          if (this.isAnimating) return;
+          this.reset();
+          this.isAnimating = true;
+          this.handshakeBtn.disabled = true;
+          const serverName = this.serverNameIn.value;
+          const selectedCipher = this.cipherSuiteIn.value;
+
+          if (!serverName.trim()) {
+            this.stepInfo.textContent = "Please enter a server name.";
+            this.isAnimating = false;
+            this.handshakeBtn.disabled = false;
+            return;
+          }
+
+          this.stepInfo.textContent = "Step 1: Client sends Hello message...";
+          this.val.tls_version.textContent = "TLS 1.3";
+          await this.highlight(this.val.tls_version);
+          const clientRandom = this.generateRandom();
+          this.val.client_random.textContent = this.truncate(clientRandom);
+          await this.highlight(this.val.client_random);
+          const sessionId = this.generateSessionId();
+          this.val.session_id.textContent = sessionId;
+          await this.highlight(this.val.session_id);
+          this.val.cipher_suites.textContent = `${selectedCipher}, TLS_AES_128_GCM_SHA256, ...`;
+          await this.highlight(this.val.cipher_suites);
+
+          this.stepInfo.textContent =
+            "Step 2: Server responds with Hello and credentials...";
+          const serverRandom = this.generateRandom();
+          this.val.server_random.textContent = this.truncate(serverRandom);
+          await this.highlight(this.val.server_random);
+          this.val.selected_cipher.textContent = selectedCipher;
+          await this.highlight(this.val.selected_cipher);
+          const serverCert = this.generateCertificate(serverName);
+          this.val.server_cert.textContent = serverCert;
+          await this.highlight(this.val.server_cert);
+          const serverKeyExchange = this.generateRandom(16);
+          this.val.server_key_exchange.textContent =
+            this.truncate(serverKeyExchange);
+          await this.highlight(this.val.server_key_exchange);
+
+          this.stepInfo.textContent = "Step 3: Establishing shared keys...";
+          const clientKeyExchange = this.generateRandom(16);
+          this.val.client_key_exchange.textContent =
+            this.truncate(clientKeyExchange);
+          await this.highlight(this.val.client_key_exchange);
+          this.stepInfo.textContent = "Generating pre-master secret...";
+          const preMasterSecret = CryptoJS.SHA256(
+            clientRandom + serverRandom + clientKeyExchange
+          ).toString();
+          this.val.premaster_secret.textContent =
+            this.truncate(preMasterSecret);
+          await this.highlight(this.val.premaster_secret);
+          this.stepInfo.textContent = "Deriving master secret...";
+          const masterSecret = CryptoJS.PBKDF2(
+            preMasterSecret,
+            clientRandom + serverRandom,
+            { keySize: 256 / 32, iterations: 1000 }
+          ).toString();
+          this.val.master_secret.textContent = this.truncate(masterSecret);
+          await this.highlight(this.val.master_secret);
+          this.stepInfo.textContent = "Deriving session keys...";
+          this.sessionKeys = {
+            clientWriteKey: CryptoJS.HmacSHA256(
+              "client write key",
+              masterSecret
+            )
+              .toString()
+              .substring(0, 32),
+            serverWriteKey: CryptoJS.HmacSHA256(
+              "server write key",
+              masterSecret
+            )
+              .toString()
+              .substring(0, 32),
+            clientWriteIV: CryptoJS.HmacSHA256("client write IV", masterSecret)
+              .toString()
+              .substring(0, 24),
+            serverWriteIV: CryptoJS.HmacSHA256("server write IV", masterSecret)
+              .toString()
+              .substring(0, 24),
+          };
+          this.val.session_keys.textContent = `Client: ${this.truncate(
+            this.sessionKeys.clientWriteKey,
+            20
+          )}...`;
+          await this.highlight(this.val.session_keys);
+
+          this.stepInfo.textContent = "Step 4: Completing handshake...";
+          const clientFinished = CryptoJS.HmacSHA256(
+            "client finished",
+            masterSecret
+          )
+            .toString()
+            .substring(0, 24);
+          this.val.client_finished.textContent = this.truncate(clientFinished);
+          await this.highlight(this.val.client_finished);
+          const serverFinished = CryptoJS.HmacSHA256(
+            "server finished",
+            masterSecret
+          )
+            .toString()
+            .substring(0, 24);
+          this.val.server_finished.textContent = this.truncate(serverFinished);
+          await this.highlight(this.val.server_finished);
+          this.stepInfo.textContent =
+            "TLS Handshake Complete! Ready for secure data exchange.";
+          this.handshakeComplete = true;
+          this.dataExchangeBtn.disabled = false;
+          this.isAnimating = false;
+        }
+
+        async startDataExchange() {
+          if (this.isAnimating || !this.handshakeComplete || !this.sessionKeys)
+            return;
+          this.isAnimating = true;
+          this.dataExchangeBtn.disabled = true;
+          const dataToSend = this.dataMessageIn.value || "GET / HTTP/1.1";
+          this.stepInfo.textContent = "Exchanging encrypted data...";
+          const encryptedData = CryptoJS.AES.encrypt(
+            dataToSend,
+            this.sessionKeys.clientWriteKey
+          ).toString();
+          this.val.encrypted_data.textContent = this.truncate(encryptedData);
+          await this.highlight(this.val.encrypted_data);
+          this.stepInfo.textContent = "Server processing and responding...";
+          const serverResponse = dataToSend.startsWith("GET")
+            ? "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<html><body>Hello World!</body></html>"
+            : `Server received: ${dataToSend}`;
+          const encryptedResponse = CryptoJS.AES.encrypt(
+            serverResponse,
+            this.sessionKeys.serverWriteKey
+          ).toString();
+          this.stepInfo.textContent = "Decrypting server response...";
+          const decryptedResponse = CryptoJS.AES.decrypt(
+            encryptedResponse,
+            this.sessionKeys.serverWriteKey
+          ).toString(CryptoJS.enc.Utf8);
+          this.val.decrypted_response.textContent = decryptedResponse;
+          if (this.finalMessageContainer) {
+            this.finalMessageContainer.classList.add("visible");
+          }
+          await this.highlight(this.val.decrypted_response, true);
+          this.stepInfo.textContent = "Secure TLS data exchange complete!";
+          this.isAnimating = false;
+        }
+
+        async highlight(element, isFinal = false) {
+          if (!element) return;
+          d3.select(element).classed("highlight", true);
+          await this.sleep(this.animationSpeed);
+          d3.select(element).classed("highlight", false);
+          if (isFinal) {
+            d3.select(element.parentNode).classed("final", true);
+          }
+        }
+
+        sleep(ms) {
+          return new Promise((resolve) => setTimeout(resolve, ms));
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        if (typeof CryptoJS !== "undefined" && typeof d3 !== "undefined") {
+          new TLSVisualizer();
+        } else {
+          console.error("CryptoJS or D3.js failed to load.");
+        }
+      });
+    </script>
+  </div>
+</VisualizerLayout>
+
+<style is:global>
+  #tls-visualizer select {
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #333;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 15px top 50%;
+    background-size: 12px;
+    padding-right: 40px;
+    text-align: left;
+    text-align-last: left;
+  }
+
+  #tls-visualizer #data-exchange-btn {
+    background: linear-gradient(45deg, #48dbfb, #0abde3);
+  }
+
+  #tls-visualizer .tls-container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-top: 20px;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  #tls-visualizer .process-panel {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 15px;
+    padding: 20px;
+    flex: 1;
+    min-width: 260px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  #tls-visualizer .process-title {
+    text-align: center;
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+
+  #tls-visualizer .tls-value-box {
+    margin-bottom: 12px;
+  }
+
+  #tls-visualizer .tls-label {
+    font-weight: bold;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  #tls-visualizer .tls-value {
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 8px;
+    border-radius: 8px;
+    margin-top: 5px;
+    min-height: 18px;
+    word-break: break-all;
+    word-wrap: break-word;
+    transition: all 0.3s ease;
+    max-height: 80px;
+    overflow-y: auto;
+  }
+
+  #tls-visualizer .client {
+    border-left: 4px solid #48dbfb;
+  }
+  #tls-visualizer .server {
+    border-left: 4px solid #ff6b6b;
+  }
+  #tls-visualizer .shared {
+    border-left: 4px solid #51cf66;
+  }
+
+  #tls-visualizer .process-panel .highlight {
+    transform: scale(1.02);
+    box-shadow: 0 0 15px #ffeb3b;
+  }
+
+  /* --- UPDATED THIS SECTION --- */
+  /* Styles for the final message display area */
+  #tls-visualizer .final-message-container {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    margin-top: 15px;
+    width: 100%;
+    max-width: 90%; /* Match overall panel width */
+    padding: 15px; /* Reduced padding */
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    font-size: 16px; /* Reduced base font size */
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    border: 2px solid transparent; /* for final highlight */
+  }
+
+  #tls-visualizer .final-message-container.visible {
+    opacity: 1;
+  }
+
+  #tls-visualizer .final-message-container.final {
+    border: 2px solid #51cf66;
+    box-shadow: 0 0 15px #51cf66;
+  }
+
+  #tls-visualizer .final-message-label {
+    font-family: "Segoe UI", sans-serif;
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 1em; /* Relative to container's 16px */
+  }
+
+  #tls-visualizer #decrypted-response-output {
+    font-family: "Courier New", monospace;
+    font-size: 14px; /* Explicitly smaller font */
+    color: white;
+    width: 100%;
+    min-height: auto;
+    word-break: break-all;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 10px;
+    border-radius: 5px;
+    box-sizing: border-box;
+  }
+</style>

@@ -2,7 +2,7 @@
 
 CipherFlow is an interactive web-based tool designed to help students, developers, and the curious understand how modern encryption algorithms work through clear, step-by-step visualizations. Instead of just reading theory, you can see the data transformation process in action.
 
-> **Note:** This project is currently a work in progress. The core visualizer is functional, but blog pages and additional content are actively being developed.
+**Note:** This project is currently under development. The core visualizer is functional, but blog pages and additional content are currently under development.
 
 ![CipherFlow AES Visualizer](./public/images/hero-visualizer.jpg)
 

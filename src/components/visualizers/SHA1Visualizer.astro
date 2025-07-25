@@ -1,0 +1,166 @@
+---
+// src/components/visualizers/SHA1Visualizer.astro
+import VisualizerLayout from './VisualizerLayout.astro';
+---
+
+<VisualizerLayout title="SHA1 Hash Visualizer" uniqueId="sha1-visualizer">
+
+    {/* The component's HTML structure remains the same. */}
+    <div slot="controls">
+        <div class="control-group">
+            <label for="text-input">Enter Text:</label>
+            <input type="text" id="text-input" placeholder="Enter text to hash">
+        </div>
+        <div class="control-group">
+            <label for="hash-input">Hash (for verification):</label>
+            <input type="text" id="hash-input" placeholder="Enter hash to verify">
+        </div>
+        <div class="control-group">
+            <label for="speed-slider">Speed:</label>
+            <div class="speed-controls">
+                <input type="range" id="speed-slider" min="1" max="10" value="5">
+                <span id="speed-display" class="speed-display">5</span>
+            </div>
+        </div>
+    </div>
+
+    <div slot="actions">
+        <button id="generate-btn">🔐 Generate Hash</button>
+        <button id="verify-btn">🔍 Verify Hash</button>
+        <button id="reset-btn">↻ Reset</button>
+    </div>
+
+    <div slot="text-display">
+        <!-- The hash will be displayed here dynamically. -->
+    </div>
+
+    {/* The script section is updated to handle loading correctly. */}
+    <div slot="script">
+        <script is:inline>
+            document.addEventListener('DOMContentLoaded', () => {
+                const container = document.getElementById('sha1-visualizer');
+                if (!container) return;
+
+                // This function contains all the logic to set up the visualizer.
+                // It will only be called after we are certain CryptoJS has loaded.
+                function initializeVisualizer() {
+                    const textInput = container.querySelector('#text-input');
+                    const hashInput = container.querySelector('#hash-input');
+                    const speedSlider = container.querySelector('#speed-slider');
+                    const speedDisplay = container.querySelector('#speed-display');
+                    const generateBtn = container.querySelector('#generate-btn');
+                    const verifyBtn = container.querySelector('#verify-btn');
+                    const resetBtn = container.querySelector('#reset-btn');
+                    const hashDisplay = container.querySelector('.text-display');
+                    const stepInfo = container.querySelector('.step-info');
+                    
+                    let animationInterval;
+
+                    stepInfo.textContent = 'Enter text and click "Generate Hash" to begin.';
+
+                    speedSlider.addEventListener('input', () => {
+                        speedDisplay.textContent = speedSlider.value;
+                    });
+
+                    generateBtn.addEventListener('click', () => {
+                        const text = textInput.value;
+                        if (text) {
+                            stepInfo.textContent = 'Generating SHA1 hash...';
+                            const hash = CryptoJS.SHA1(text).toString();
+                            displayHash(hash, speedSlider.value);
+                        } else {
+                            stepInfo.textContent = 'Please enter text to generate a hash.';
+                            hashDisplay.textContent = '';
+                            hashDisplay.className = 'text-display';
+                        }
+                    });
+
+                    verifyBtn.addEventListener('click', () => {
+                        const text = textInput.value;
+                        const providedHash = hashInput.value.trim().toLowerCase();
+                        if (animationInterval) clearInterval(animationInterval);
+
+                        if (text && providedHash) {
+                            const calculatedHash = CryptoJS.SHA1(text).toString();
+                            if (calculatedHash === providedHash) {
+                                stepInfo.textContent = 'SHA1 verification successful! ✓';
+                                hashDisplay.textContent = 'Hash matches!';
+                                hashDisplay.className = 'text-display success';
+                            } else {
+                                stepInfo.textContent = 'SHA1 verification failed! ✗';
+                                hashDisplay.textContent = 'Hash does not match.';
+                                hashDisplay.className = 'text-display error';
+                            }
+                        } else {
+                            stepInfo.textContent = 'Please enter both text and a hash to verify.';
+                            hashDisplay.textContent = '';
+                            hashDisplay.className = 'text-display';
+                        }
+                    });
+
+                    resetBtn.addEventListener('click', () => {
+                        if (animationInterval) clearInterval(animationInterval);
+                        textInput.value = '';
+                        hashInput.value = '';
+                        hashDisplay.textContent = '';
+                        stepInfo.textContent = 'Enter text and click "Generate Hash" to begin.';
+                        hashDisplay.className = 'text-display';
+                    });
+
+                    function displayHash(hash, speed) {
+                        if (animationInterval) clearInterval(animationInterval);
+                        hashDisplay.textContent = '';
+                        hashDisplay.className = 'text-display';
+                        let i = 0;
+                        const delay = 1000 / speed;
+
+                        animationInterval = setInterval(() => {
+                            if (i < hash.length) {
+                                hashDisplay.textContent += hash[i];
+                                i++;
+                            } else {
+                                clearInterval(animationInterval);
+                                stepInfo.textContent = 'SHA1 hash generation complete! (40 characters)';
+                            }
+                        }, delay);
+                    }
+                }
+
+                // --- SCRIPT LOADER ---
+                // Check if the CryptoJS library is already loaded on the page.
+                if (typeof CryptoJS !== 'undefined') {
+                    initializeVisualizer();
+                } else {
+                    // If not, create a new script tag to load it dynamically.
+                    const script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js';
+                    
+                    // Set the function to run once the script has successfully loaded.
+                    script.onload = initializeVisualizer;
+
+                    // Handle cases where the script fails to load.
+                    script.onerror = () => {
+                        const stepInfo = container.querySelector('.step-info');
+                        stepInfo.textContent = 'Error: Could not load Crypto library. Please check your internet connection.';
+                        console.error('Failed to load the CryptoJS library from CDN.');
+                    };
+                    
+                    // Append the script to the head to start loading it.
+                    document.head.appendChild(script);
+                }
+            });
+        </script>
+    </div>
+</VisualizerLayout>
+
+<style>
+    /* These styles provide visual feedback for the verification status. */
+    .text-display.success {
+        color: #51cf66; /* Bright Green */
+        font-weight: bold;
+    }
+    .text-display.error {
+        color: #ff6b6b; /* Bright Red */
+        font-weight: bold;
+    }
+</style>
