@@ -14,19 +14,31 @@ const pageDescription = "Have a question, feedback, or a suggestion? Get in touc
 
     <div class="max-w-xl mx-auto">
       
-      <!-- START: Replace your form with this entire block -->
+      <!-- 
+        =====================================================================
+        THIS IS THE HIDDEN "BLUEPRINT" FORM FOR NETLIFY'S BUILD BOTS
+        This form is never shown to the user. It just tells Netlify what to expect.
+        It has all the same inputs and names as the visible form.
+        =====================================================================
+      -->
+      <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+        <input type="text" name="name" />
+        <input type="email" name="email" />
+        <textarea name="message"></textarea>
+      </form>
+
+      <!-- 
+        =====================================================================
+        THIS IS YOUR VISIBLE, STYLED FORM FOR USERS
+        It submits data that matches the blueprint above.
+        =====================================================================
+      -->
       <form 
         name="contact" 
         method="POST" 
-        data-netlify="true" 
-        data-netlify-honeypot="bot-field"
         action="/thank-you"
         class="space-y-6"
       >
-        {/* This hidden input is REQUIRED by Netlify to identify the form from the static HTML. */}
-        <input type="hidden" name="form-name" value="contact" />
-
-        {/* This is the spam "honeypot" field. It should be hidden from users. */}
         <p class="hidden">
           <label>
             Don’t fill this out if you’re human: <input name="bot-field" />
@@ -60,8 +72,7 @@ const pageDescription = "Have a question, feedback, or a suggestion? Get in touc
           </button>
         </div>
       </form>
-      <!-- END: End of the replacement block -->
-
+      
     </div>
   </div>
 </BaseLayout>
