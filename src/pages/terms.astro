@@ -1,13 +1,40 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const pageTitle = "Terms of Service";
+const pageDescription = "Please read our Terms of Service carefully before using the CipherFlow website.";
 ---
-<BaseLayout title="Terms of Service" description="Terms of Service for CipherFlow.">
-  <div class="container mx-auto px-6 py-16">
-    <div class="max-w-3xl mx-auto">
-      <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-6">Terms of Service</h1>
-      <div class="prose dark:prose-invert max-w-none">
-        <p>This page is under construction. Our Terms of Service will be detailed here soon.</p>
-      </div>
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <div class="max-w-4xl mx-auto px-6 py-12">
+    <header class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">Terms of Service</h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Last Updated: July 20, 2025</p>
+    </header>
+
+    <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+      <p>Welcome to CipherFlow! These terms and conditions outline the rules and regulations for the use of our website.</p>
+
+      <h3>1. Acceptance of Terms</h3>
+      <p>By accessing this website, we assume you accept these terms and conditions. Do not continue to use CipherFlow if you do not agree to all of the terms and conditions stated on this page.</p>
+      
+      <h3>2. Intellectual Property Rights</h3>
+      <p>Other than the content you own, under these Terms, CipherFlow and/or its licensors own all the intellectual property rights and materials contained in this Website. You are granted a limited license only for purposes of viewing the material contained on this Website.</p>
+
+      <h3>3. Restrictions</h3>
+      <p>You are specifically restricted from all of the following:</p>
+      <ul>
+        <li>Publishing any website material in any other media without attribution.</li>
+        <li>Selling, sublicensing, and/or otherwise commercializing any website material.</li>
+        <li>Using this website in any way that is or may be damaging to this website.</li>
+        <li>Using this website contrary to applicable laws and regulations, or in any way may cause harm to the website, or to any person or business entity.</li>
+      </ul>
+      
+      <h3>4. No warranties</h3>
+      <p>This Website is provided "as is," with all faults, and CipherFlow expresses no representations or warranties, of any kind related to this Website or the materials contained on this Website. Also, nothing contained on this Website shall be interpreted as advising you.</p>
+      
+      <h3>5. Governing Law & Jurisdiction</h3>
+      <p>These Terms will be governed by and interpreted in accordance with the laws of [Your State/Country], and you submit to the non-exclusive jurisdiction of the state and federal courts located in [Your City/Country] for the resolution of any disputes.</p>
     </div>
   </div>
 </BaseLayout>

@@ -430,6 +430,7 @@ const uniqueId = "signal-visualizer";
         margin-top: 3px;
         min-height: 16px;
         word-wrap: break-word;
+        word-break: break-all;
         transition: all 0.3s ease;
         max-height: 60px;
         overflow-y: auto;
@@ -459,20 +460,24 @@ const uniqueId = "signal-visualizer";
         margin-bottom: 15px;
         font-weight: bold;
     }
-    .message-box {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 10px;
-        padding: 15px;
-        margin: 10px 0;
-        border-left: 4px solid #26d0ce;
-        transition: all 0.3s ease;
-    }
-    .error {
-        color: #ff6b6b;
-        background: rgba(255, 107, 107, 0.1);
-        padding: 10px;
-        border-radius: 8px;
-        margin: 10px 0;
-        grid-column: 1 / -1;
-    }
+#signal-visualizer .message-box {
+    font-size: 14px !important;
+}
+
+/* 2. Force the unused container to be hidden with !important */
+:global(#signal-visualizer .final-message-container) {
+    display: none !important;
+}
+
+/* 3. Keep the responsive layout for mobile */
+@media (max-width: 768px) {
+  .signal-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 4. Keep the text wrapping fix */
+.signal-value {
+    word-break: break-all;
+}
 </style>
