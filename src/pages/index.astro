@@ -160,7 +160,7 @@ const base = import.meta.env.BASE_URL;
     </div>
   </section>
 
-  <!-- Newsletter Section -->
+<!-- Newsletter Section -->
   <section class="py-16 bg-white dark:bg-gray-900">
     <div class="container mx-auto px-6">
       <div class="max-w-3xl mx-auto text-center">
@@ -171,32 +171,31 @@ const base = import.meta.env.BASE_URL;
           Subscribe for in-depth articles, practical case studies, and security insights that build on our interactive tools
         </p>
         
-        <!-- ===================================================================== -->
-        <!-- START: THIS IS THE UPDATED FORM -->
-        <!-- ===================================================================== -->
-        <form 
+        <!-- This is now a clean form, ready for Buttondown -->
+         <form 
           class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
-          action="https://assets.mailerlite.com/jsonp/1692334/forms/160939677452338584/subscribe" 
+          action="https://buttondown.com/api/emails/embed-subscribe/powergr"
           method="POST"
+          target="_blank"
         >
-          <!-- 
-            The name="fields[email]" is REQUIRED by MailerLite.
-            Do not change it.
-          -->
+          <!-- The 'name="email"' is required by Buttondown -->
           <input
             type="email"
-            name="fields[email]"
+            name="email"
             placeholder="Enter your email"
             class="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           />
-
-          <!-- 
-            This hidden input is also REQUIRED by MailerLite.
-            Copy it from their HTML code snippet.
-          -->
-          <input type="hidden" name="ml-submit" value="1" />
           
+          <!-- 
+            This hidden input tells Buttondown where to redirect the user after a successful submission.
+            The full URL is used for maximum reliability.
+          -->
+          <input type="hidden" name="location" value="https://powergr.github.io/cipherflow-visualizer/subscription-thank-you">
+
+          <!-- This hidden tag is optional but good practice to identify subscribers from this specific form -->
+          <input type="hidden" name="tag" value="homepage-form">
+
           <button
             type="submit"
             class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -204,9 +203,6 @@ const base = import.meta.env.BASE_URL;
             Subscribe
           </button>
         </form>
-        <!-- ===================================================================== -->
-        <!-- END: END OF THE UPDATED FORM -->
-        <!-- ===================================================================== -->
         
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
           We respect your privacy. Unsubscribe at any time.
@@ -214,44 +210,4 @@ const base = import.meta.env.BASE_URL;
       </div>
     </div>
   </section>
-    <script define:vars={{ base }}>
-    const newsletterForm = document.querySelector('form[action*="mailerlite.com"]');
-    
-    if (newsletterForm) {
-      newsletterForm.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Stop the default form submission which shows the ugly JSON
-
-        const submitButton = newsletterForm.querySelector('button[type="submit"]');
-        const originalButtonText = submitButton.innerHTML;
-        submitButton.disabled = true;
-        submitButton.innerHTML = 'Subscribing...';
-
-        const formData = new FormData(newsletterForm);
-        const actionURL = newsletterForm.action;
-
-        try {
-          // Send the data in the background. We use 'no-cors' mode because
-          // we don't need to read the response, just send the data.
-          await fetch(actionURL, {
-            method: 'POST',
-            body: new URLSearchParams(formData).toString(),
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            mode: 'no-cors', 
-          });
-
-          // If the fetch command completes without error, it means the data was sent.
-          // Now, we manually redirect to our beautiful thank-you page.
-          window.location.href = `${base}/subscription-thank-you`;
-
-        } catch (error) {
-          console.error("Subscription failed:", error);
-          alert("Sorry, we couldn't subscribe you at this time. Please try again.");
-          submitButton.disabled = false;
-          submitButton.innerHTML = originalButtonText;
-        }
-      });
-    }
-  </script>
 </BaseLayout>
