@@ -1,5 +1,6 @@
 ---
 import logo from '/public/images/logo.png';
+import { Image } from 'astro:assets';
 const currentYear = new Date().getFullYear();
 const base = import.meta.env.BASE_URL;
 
@@ -59,7 +60,15 @@ const socialLinks = [
         <div class="flex items-center space-x-3 mb-4">
         <a href={base} class="flex items-center space-x-3 text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
          <!-- The new image tag replaces the old SVG block -->
-        <img src={logo.src} alt="CipherFlow Logo" class="w-8 h-8">
+                  <Image 
+            src={logo} 
+            alt="CipherFlow Logo" 
+            width={40} 
+            height={40} 
+            format="webp"
+            quality="mid"
+            class="w-8 h-8" 
+          />
   
         <span class="hidden sm:block">CipherFlow</span>
         </a>
@@ -138,7 +147,7 @@ const socialLinks = [
       <div class="text-sm text-gray-600 dark:text-gray-400">
         <p>
           We use cookies to enhance your experience and analyze our traffic. 
-          <a href=`${base}/cookies` class="text-primary-600 dark:text-primary-400 hover:underline">Learn more about our cookie policy</a>
+          <a href=`${base}/cookies` class="text-primary-700 dark:text-primary-300 hover:underline">Learn more about our cookie policy</a>
         </p>
       </div>
       <div class="flex items-center space-x-3">

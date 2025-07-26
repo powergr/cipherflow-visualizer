@@ -1,6 +1,7 @@
 ---
 // BlogLayout.astro
 import BaseLayout from './BaseLayout.astro';
+import { Image } from 'astro:assets';
 import { blogUtils } from '../content/config';
 
 export interface Props {
@@ -212,9 +213,13 @@ const structuredData = {
     <!-- Featured Image -->
     {image && (
       <div class="mb-8 rounded-lg overflow-hidden shadow-lg">
-        <img 
+        <Image 
           src={image} 
           alt={imageAlt || title}
+          width={800}
+          height={450}
+          format="webp"
+          quality={80}
           class="w-full h-auto max-h-[450px] object-contain object-center mx-auto"
           loading="eager"
         />
