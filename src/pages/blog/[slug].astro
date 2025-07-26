@@ -16,6 +16,7 @@ import PGPVisualizer from '../../components/visualizers/PGPVisualizer.astro';
 import SignalVisualizer from '../../components/visualizers/SignalVisualizer.astro';
 import TlsVisualizer from '../../components/visualizers/TlsVisualizer.astro';
 import EdDSAVisualizer from '../../components/visualizers/EdDSAVisualizer.astro';
+import ElGamalVisualizer from '../../components/visualizers/ElGamalVisualizer.astro';
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection('blog');
@@ -213,6 +214,15 @@ const socialImageUrl = socialImage || (cover ? cover.src : undefined) || '/image
         Interactive EdDSA Visualizer
       </h2>
       <EdDSAVisualizer />
+    </div>
+  )}
+
+                         {entry.data.visualizer === 'ElGamalVisualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive El Gamal Visualizer
+      </h2>
+      <ElGamalVisualizer />
     </div>
   )}
 

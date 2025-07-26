@@ -1,0 +1,366 @@
+---
+// src/components/visualizers/ElGamalVisualizer.astro
+import VisualizerLayout from './VisualizerLayout.astro';
+---
+
+<VisualizerLayout title="ElGamal Encryption Visualizer" uniqueId="elgamal-visualizer">
+    <div slot="controls" class="control-group">
+        <label for="elgamal-message">Message (as number):</label>
+        <input type="number" id="elgamal-message" value="15" min="1" />
+    </div>
+
+    <div slot="actions">
+        <button id="elgamal-encrypt-btn">🔐 Encrypt</button>
+        <button id="elgamal-decrypt-btn" disabled>🔓 Decrypt</button>
+    </div>
+
+    <div slot="validation">
+        <!-- Validation messages will appear here -->
+    </div>
+
+    <div slot="visualization-panel">
+        <div class="elgamal-panel">
+            <div class="elgamal-box">
+                <div class="elgamal-box-title">1. Key Generation</div>
+                <div class="elgamal-value-box">
+                    <div class="elgamal-value-label">Prime p:</div>
+                    <div class="elgamal-value" id="elgamal-p"></div>
+                </div>
+                <div class="elgamal-value-box">
+                    <div class="elgamal-value-label">Generator g:</div>
+                    <div class="elgamal-value" id="elgamal-g"></div>
+                </div>
+                <div class="elgamal-value-box">
+                    <div class="elgamal-value-label">Private key x:</div>
+                    <div class="elgamal-value" id="elgamal-x"></div>
+                </div>
+                <div class="elgamal-value-box">
+                    <div class="elgamal-value-label">Public key y = g^x mod p:</div>
+                    <div class="elgamal-value" id="elgamal-y"></div>
+                </div>
+            </div>
+
+            <div class="elgamal-box">
+                <div class="elgamal-box-title">2. Encryption</div>
+                <div class="elgamal-value-box">
+                    <div class="elgamal-value-label">Ephemeral k:</div>
+                    <div class="elgamal-value" id="elgamal-k"></div>
+                </div>
+                <div class="elgamal-value-box">
+                    <div class="elgamal-value-label">Cipher c1 = g^k mod p:</div>
+                    <div class="elgamal-value" id="elgamal-c1"></div>
+                </div>
+                <div class="elgamal-value-box">
+                    <div class="elgamal-value-label">Cipher c2 = m * y^k mod p:</div>
+                    <div class="elgamal-value" id="elgamal-c2"></div>
+                </div>
+            </div>
+
+            <div class="elgamal-box">
+                <div class="elgamal-box-title">3. Decryption</div>
+                <div class="elgamal-value-box">
+                    <div class="elgamal-value-label">Decrypted Value m' = c2 * (c1^x)^-1 mod p:</div>
+                    <div class="elgamal-value" id="elgamal-decrypted"></div>
+                </div>
+                <div class="elgamal-value-box">
+                    <div class="elgamal-value-label">Final Message:</div>
+                    <div class="elgamal-value" id="elgamal-verified-message"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div slot="text-display">
+        <!-- Text display handled by the panel above -->
+    </div>
+
+    <script slot="script">
+        class ElGamalVisualizer {
+            constructor() {
+                this.isAnimating = false;
+                this.animationSpeed = 500; // ms per step
+                this.initializeElements();
+                this.setupEventListeners();
+            }
+
+            initializeElements() {
+                this.msgIn = document.getElementById('elgamal-message');
+                this.encryptBtn = document.getElementById('elgamal-encrypt-btn');
+                this.decryptBtn = document.getElementById('elgamal-decrypt-btn');
+                this.stepInfo = document.querySelector('#elgamal-visualizer .step-info');
+                this.progressFill = document.querySelector('#elgamal-visualizer .progress-fill');
+
+                this.val = {
+                    p: document.getElementById('elgamal-p'),
+                    g: document.getElementById('elgamal-g'),
+                    x: document.getElementById('elgamal-x'),
+                    y: document.getElementById('elgamal-y'),
+                    k: document.getElementById('elgamal-k'),
+                    c1: document.getElementById('elgamal-c1'),
+                    c2: document.getElementById('elgamal-c2'),
+                    decrypted: document.getElementById('elgamal-decrypted'),
+                    message: document.getElementById('elgamal-verified-message')
+                };
+                
+                this.params = {};
+            }
+
+            setupEventListeners() {
+                this.encryptBtn.addEventListener('click', () => {
+                    if (!this.isAnimating) this.encrypt();
+                });
+                this.decryptBtn.addEventListener('click', () => {
+                    if (!this.isAnimating) this.decrypt();
+                });
+            }
+
+            modPow(base, exp, mod) {
+                base = BigInt(base);
+                exp = BigInt(exp);
+                mod = BigInt(mod);
+                let result = 1n;
+                base = base % mod;
+                while (exp > 0n) {
+                    if (exp % 2n === 1n) result = (result * base) % mod;
+                    base = (base * base) % mod;
+                    exp = exp / 2n;
+                }
+                return result;
+            }
+
+            modInverse(a, m) {
+                a = BigInt(a);
+                m = BigInt(m);
+                let m0 = m, t, q;
+                let x0 = 0n, x1 = 1n;
+                if (m === 1n) return 0n;
+                while (a > 1n) {
+                    q = a / m;
+                    t = m;
+                    m = a % m;
+                    a = t;
+                    t = x0;
+                    x0 = x1 - q * x0;
+                    x1 = t;
+                }
+                if (x1 < 0n) x1 += m0;
+                return x1;
+            }
+
+            async encrypt() {
+                this.isAnimating = true;
+                this.reset();
+                this.encryptBtn.disabled = true;
+
+                const m = BigInt(this.msgIn.value);
+                if (m <= 0n) {
+                    this.stepInfo.textContent = 'Please enter a positive number.';
+                    this.isAnimating = false;
+                    this.encryptBtn.disabled = false;
+                    return;
+                }
+
+                this.stepInfo.textContent = 'Generating public and private keys...';
+                const p = 467n, g = 2n, x = 127n;
+                
+                this.updateProgress(10);
+                this.val.p.textContent = p;
+                await this.highlight(this.val.p);
+                
+                this.updateProgress(20);
+                this.val.g.textContent = g;
+                await this.highlight(this.val.g);
+
+                this.updateProgress(30);
+                this.val.x.textContent = x;
+                await this.highlight(this.val.x);
+
+                this.stepInfo.textContent = 'Calculating public key y = g^x mod p';
+                const y = this.modPow(g, x, p);
+                this.updateProgress(40);
+                this.val.y.textContent = y;
+                await this.highlight(this.val.y);
+                
+                this.stepInfo.textContent = 'Encrypting the message with a random key...';
+                const k = 59n; // Fixed for demonstration
+                this.updateProgress(50);
+                this.val.k.textContent = k;
+                await this.highlight(this.val.k);
+
+                this.stepInfo.textContent = 'Calculating cipher part c1 = g^k mod p';
+                const c1 = this.modPow(g, k, p);
+                this.updateProgress(60);
+                this.val.c1.textContent = c1;
+                await this.highlight(this.val.c1);
+
+                this.stepInfo.textContent = 'Calculating cipher part c2 = m * y^k mod p';
+                const c2 = (m * this.modPow(y, k, p)) % p;
+                this.updateProgress(70);
+                this.val.c2.textContent = c2;
+                await this.highlight(this.val.c2);
+
+                this.params = { p, g, x, y, m, c1, c2 };
+                this.stepInfo.textContent = 'Encryption complete. Ready to decrypt.';
+                this.decryptBtn.disabled = false;
+                this.isAnimating = false;
+            }
+
+            async decrypt() {
+                this.isAnimating = true;
+                this.decryptBtn.disabled = true;
+                this.encryptBtn.disabled = true;
+                
+                const { p, x, c1, c2 } = this.params;
+                this.stepInfo.textContent = 'Decrypting... calculating s = c1^x mod p';
+                this.updateProgress(80);
+                const s = this.modPow(c1, x, p);
+                await this.highlight(this.val.c1);
+                await this.highlight(this.val.x);
+                
+                this.stepInfo.textContent = "Calculating final message m = c2 * s^-1 mod p";
+                this.updateProgress(90);
+                const sInv = this.modInverse(s, p);
+                const m = (c2 * sInv) % p;
+                this.val.decrypted.textContent = m;
+                await this.highlight(this.val.decrypted);
+                
+                this.updateProgress(100);
+                this.stepInfo.textContent = 'Decryption complete!';
+                this.val.message.textContent = `📨 Message Verified! The message is: ${m}`;
+                await this.highlight(this.val.message, 1.5, true);
+
+                this.isAnimating = false;
+                this.encryptBtn.disabled = false;
+            }
+            
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+            
+            updateProgress(percentage) {
+                this.progressFill.style.width = percentage + '%';
+            }
+
+            reset() {
+                Object.values(this.val).forEach(el => el.textContent = '');
+                this.decryptBtn.disabled = true;
+                this.encryptBtn.disabled = false;
+                this.updateProgress(0);
+                document.querySelectorAll('#elgamal-visualizer .elgamal-value-box').forEach(el => {
+                    el.classList.remove('elgamal-final', 'elgamal-highlight-final');
+                });
+                this.stepInfo.textContent = 'Enter a number and click "Encrypt".';
+            }
+
+            async highlight(element, durationFactor = 1, isFinal = false) {
+                const className = isFinal ? 'elgamal-highlight-final' : 'elgamal-highlight';
+                const valueBox = element.closest('.elgamal-value-box');
+                if (valueBox) {
+                    valueBox.classList.add(className);
+                    await this.sleep(this.animationSpeed * durationFactor);
+                    valueBox.classList.remove(className);
+                    if (isFinal) {
+                        valueBox.classList.add('elgamal-final');
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new ElGamalVisualizer();
+        });
+    </script>
+</VisualizerLayout>
+
+<style is:global>
+    /* ElGamal-specific styles */
+    .visualizer-container .elgamal-panel {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .visualizer-container .elgamal-box {
+        background: rgba(0, 0, 0, 0.15);
+        flex: 1;
+        min-width: 280px;
+        border-radius: 10px;
+        padding: 15px;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .visualizer-container .elgamal-box-title {
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 15px;
+        text-align: center;
+        color: #fff;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .visualizer-container .elgamal-value-box {
+        margin: 10px 0;
+        transition: all 0.3s ease;
+        padding: 5px;
+        border-radius: 8px;
+    }
+
+    .visualizer-container .elgamal-value-label {
+        font-size: 14px;
+        opacity: 0.8;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .visualizer-container .elgamal-value {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        word-break: break-word;
+        min-height: 20px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .visualizer-container .elgamal-highlight {
+        transform: scale(1.02);
+        box-shadow: 0 0 15px rgba(255, 235, 59, 0.6);
+        background: rgba(255, 235, 59, 0.1);
+        border: 1px solid rgba(255, 235, 59, 0.3);
+    }
+
+    .visualizer-container .elgamal-highlight-final {
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(81, 207, 102, 0.6);
+        background: rgba(81, 207, 102, 0.1);
+        border: 1px solid rgba(81, 207, 102, 0.3);
+    }
+
+    .visualizer-container .elgamal-final {
+        border: 2px solid #51cf66;
+        background: rgba(81, 207, 102, 0.05);
+    }
+
+    .visualizer-container .elgamal-final .elgamal-value {
+        background: rgba(81, 207, 102, 0.1);
+        border-color: rgba(81, 207, 102, 0.3);
+        font-weight: bold;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .visualizer-container .elgamal-panel {
+            flex-direction: column;
+        }
+        
+        .visualizer-container .elgamal-box {
+            min-width: 100%;
+        }
+    }
+</style>
