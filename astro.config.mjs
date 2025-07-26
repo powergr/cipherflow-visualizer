@@ -25,7 +25,7 @@ export default defineConfig({
   
   // Build configuration
   build: {
-    inlineStylesheets: 'auto',
+    inlineStylesheets: 'always',
     assets: '_assets'
   },
   
