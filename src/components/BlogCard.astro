@@ -1,11 +1,8 @@
 ---
 // src/components/BlogCard.astro
 import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
 
-// --- THIS IS THE FIX ---
-// Instead of a manual interface, we use CollectionEntry<'blog'>.
-// This is Astro's official type for a blog post, and it already knows
-// that 'image' is an object with a '.src' property from your config.ts!
 export interface Props {
   post: CollectionEntry<'blog'>;
 }
@@ -35,11 +32,14 @@ const difficultyColors = {
   // FIX #1: Added a background color to the 'frame' div
   <div class="overflow-hidden bg-gray-200 dark:bg-gray-700">
     <a href=`${base}/blog/${post.slug}`>
-      <img 
-        src={post.data.thumbnail.src} 
+      <Image 
+        src={post.data.thumbnail} 
         alt={post.data.thumbnailAlt || post.data.title}
+        width={400}
+        height={225}
+        format="webp"
+        quality={80}
         class="w-full h-48 object-contain object-center transition-transform duration-300 group-hover:scale-105"
-        loading="lazy"
       />
     </a>
   </div>
