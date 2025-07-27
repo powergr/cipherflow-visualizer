@@ -1,0 +1,396 @@
+---
+// src/components/visualizers/DHVisualizer.astro
+import VisualizerLayout from './VisualizerLayout.astro';
+---
+
+<VisualizerLayout title="Diffie-Hellman Key Exchange" uniqueId="dh-visualizer">
+    <div slot="controls">
+        <div class="control-group">
+            <label for="dh-prime">Public Prime (p):</label>
+            <input type="number" id="dh-prime" value="23">
+        </div>
+        <div class="control-group">
+            <label for="dh-generator">Public Generator (g):</label>
+            <input type="number" id="dh-generator" value="5">
+        </div>
+        <div class="control-group">
+            <label for="dh-alice-secret">Alice's Private Secret (a):</label>
+            <input type="number" id="dh-alice-secret" value="6">
+        </div>
+        <div class="control-group">
+            <label for="dh-bob-secret">Bob's Private Secret (b):</label>
+            <input type="number" id="dh-bob-secret" value="15">
+        </div>
+    </div>
+
+    <div slot="validation">
+        <div class="dh-validation" id="dh-validation">
+            Set parameters and start the exchange. (Note: Small numbers are for demo only!)
+        </div>
+    </div>
+
+    <div slot="actions">
+        <button id="dh-start-btn">🚀 Start Exchange</button>
+        <button id="dh-reset-btn">↻ Reset</button>
+    </div>
+
+    <div slot="visualization-panel">
+        <div class="dh-exchange-container">
+            <div class="dh-party-panel" id="dh-alice-panel">
+                <div class="dh-party-title">Alice's Side</div>
+                <div class="dh-value-box">
+                    <div class="dh-label">Private Secret (a)</div>
+                    <div class="dh-value private" id="dh-alice-private-val"></div>
+                </div>
+                <div class="dh-value-box">
+                    <div class="dh-label">Public Key (A = g^a mod p)</div>
+                    <div class="dh-value public" id="dh-alice-public-val"></div>
+                </div>
+                <div class="dh-value-box">
+                    <div class="dh-label">Received Key (B)</div>
+                    <div class="dh-value public" id="dh-alice-received-val"></div>
+                </div>
+                <div class="dh-value-box">
+                    <div class="dh-label">Shared Secret (s = B^a mod p)</div>
+                    <div class="dh-value shared" id="dh-alice-shared-val"></div>
+                </div>
+            </div>
+
+            <div class="dh-party-panel" id="dh-bob-panel">
+                <div class="dh-party-title">Bob's Side</div>
+                <div class="dh-value-box">
+                    <div class="dh-label">Private Secret (b)</div>
+                    <div class="dh-value private" id="dh-bob-private-val"></div>
+                </div>
+                <div class="dh-value-box">
+                    <div class="dh-label">Public Key (B = g^b mod p)</div>
+                    <div class="dh-value public" id="dh-bob-public-val"></div>
+                </div>
+                <div class="dh-value-box">
+                    <div class="dh-label">Received Key (A)</div>
+                    <div class="dh-value public" id="dh-bob-received-val"></div>
+                </div>
+                <div class="dh-value-box">
+                    <div class="dh-label">Shared Secret (s = A^b mod p)</div>
+                    <div class="dh-value shared" id="dh-bob-shared-val"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div slot="text-display">
+        <span id="dh-result-text">Final shared secret will appear here.</span>
+    </div>
+
+    <script slot="script">
+        class DiffieHellmanVisualizer {
+            constructor() {
+                this.isAnimating = false;
+                this.animationSpeed = 1000; // ms per major step
+                this.initializeElements();
+                this.setupEventListeners();
+                this.reset();
+            }
+
+            initializeElements() {
+                this.primeInput = document.getElementById('dh-prime');
+                this.generatorInput = document.getElementById('dh-generator');
+                this.aliceSecretInput = document.getElementById('dh-alice-secret');
+                this.bobSecretInput = document.getElementById('dh-bob-secret');
+                
+                this.startBtn = document.getElementById('dh-start-btn');
+                this.resetBtn = document.getElementById('dh-reset-btn');
+                
+                this.stepInfo = document.querySelector('#dh-visualizer .step-info');
+                this.progressFill = document.querySelector('#dh-visualizer .progress-fill');
+                this.resultText = document.getElementById('dh-result-text');
+                this.validation = document.getElementById('dh-validation');
+
+                this.alice = {
+                    panel: document.getElementById('dh-alice-panel'),
+                    private: document.getElementById('dh-alice-private-val'),
+                    public: document.getElementById('dh-alice-public-val'),
+                    received: document.getElementById('dh-alice-received-val'),
+                    shared: document.getElementById('dh-alice-shared-val')
+                };
+                this.bob = {
+                    panel: document.getElementById('dh-bob-panel'),
+                    private: document.getElementById('dh-bob-private-val'),
+                    public: document.getElementById('dh-bob-public-val'),
+                    received: document.getElementById('dh-bob-received-val'),
+                    shared: document.getElementById('dh-bob-shared-val')
+                };
+            }
+
+            setupEventListeners() {
+                this.startBtn.addEventListener('click', () => this.startAnimation());
+                this.resetBtn.addEventListener('click', () => this.reset());
+            }
+
+            reset() {
+                this.isAnimating = false;
+                this.startBtn.disabled = false;
+                
+                // Clear all DH values and remove highlights
+                document.querySelectorAll('#dh-visualizer .dh-value').forEach(el => {
+                    el.textContent = '';
+                    el.classList.remove('dh-highlight', 'dh-highlight-final');
+                });
+                
+                this.alice.private.textContent = this.aliceSecretInput.value;
+                this.bob.private.textContent = this.bobSecretInput.value;
+
+                this.stepInfo.textContent = 'Enter parameters and click Start Exchange to begin!';
+                this.resultText.textContent = 'Final shared secret will appear here.';
+                this.validation.textContent = 'Set parameters and start the exchange. (Note: Small numbers are for demo only!)';
+                this.updateProgress(0);
+                
+                // Remove final highlight from result display
+                document.querySelector('#dh-visualizer .text-display').classList.remove('dh-highlight-final');
+            }
+
+            updateProgress(percentage) {
+                this.progressFill.style.width = percentage + '%';
+            }
+
+            async startAnimation() {
+                if (this.isAnimating) return;
+                this.isAnimating = true;
+                this.startBtn.disabled = true;
+                this.reset();
+                this.startBtn.disabled = true;
+                
+                // Use BigInt for all calculations to handle large numbers
+                const p = BigInt(this.primeInput.value);
+                const g = BigInt(this.generatorInput.value);
+                const a = BigInt(this.aliceSecretInput.value);
+                const b = BigInt(this.bobSecretInput.value);
+
+                // Modular exponentiation function for BigInt
+                const power = (base, exp, mod) => {
+                    let res = 1n;
+                    base %= mod;
+                    while (exp > 0n) {
+                        if (exp % 2n === 1n) res = (res * base) % mod;
+                        base = (base * base) % mod;
+                        exp /= 2n;
+                    }
+                    return res;
+                };
+
+                // Step 1: Alice calculates her public key
+                this.stepInfo.textContent = "Alice calculates her public key (A = g^a mod p)";
+                this.validation.textContent = "Alice uses her private secret to compute her public key.";
+                this.updateProgress(10);
+                await this.highlight(this.alice.private, 1);
+                const A = power(g, a, p);
+                this.alice.public.textContent = A.toString();
+                await this.highlight(this.alice.public, 1);
+                
+                // Step 2: Bob calculates his public key
+                this.stepInfo.textContent = "Bob calculates his public key (B = g^b mod p)";
+                this.validation.textContent = "Bob uses his private secret to compute his public key.";
+                this.updateProgress(25);
+                await this.highlight(this.bob.private, 1);
+                const B = power(g, b, p);
+                this.bob.public.textContent = B.toString();
+                await this.highlight(this.bob.public, 1);
+                
+                // Step 3: Exchange keys
+                this.stepInfo.textContent = "Alice and Bob exchange public keys over the insecure channel";
+                this.validation.textContent = "Public keys are exchanged safely - they can be intercepted without compromising security.";
+                this.updateProgress(50);
+                await this.animateKeyTransfer(this.alice.public, this.bob.received, A.toString());
+                await this.animateKeyTransfer(this.bob.public, this.alice.received, B.toString());
+                
+                // Step 4: Alice calculates the shared secret
+                this.stepInfo.textContent = "Alice calculates the shared secret (s = B^a mod p)";
+                this.validation.textContent = "Alice combines Bob's public key with her private secret.";
+                this.updateProgress(65);
+                await this.highlight(this.alice.received, 0.5);
+                await this.highlight(this.alice.private, 0.5);
+                const s_alice = power(B, a, p);
+                this.alice.shared.textContent = s_alice.toString();
+                await this.highlight(this.alice.shared, 1, true);
+
+                // Step 5: Bob calculates the shared secret
+                this.stepInfo.textContent = "Bob calculates the shared secret (s = A^b mod p)";
+                this.validation.textContent = "Bob combines Alice's public key with his private secret.";
+                this.updateProgress(80);
+                await this.highlight(this.bob.received, 0.5);
+                await this.highlight(this.bob.private, 0.5);
+                const s_bob = power(A, b, p);
+                this.bob.shared.textContent = s_bob.toString();
+                await this.highlight(this.bob.shared, 1, true);
+                
+                // Final Step
+                this.stepInfo.textContent = "Success! Both parties have the same secret key";
+                this.validation.textContent = "The shared secret was established without ever transmitting it!";
+                this.updateProgress(100);
+                this.resultText.textContent = `Shared Secret: ${s_alice.toString()}`;
+                document.querySelector('#dh-visualizer .text-display').classList.add('dh-highlight-final');
+
+                this.isAnimating = false;
+                this.startBtn.disabled = false;
+            }
+
+            async highlight(element, durationFactor, isFinal = false) {
+                const className = isFinal ? 'dh-highlight-final' : 'dh-highlight';
+                element.classList.add(className);
+                await this.sleep(this.animationSpeed * durationFactor);
+                element.classList.remove(className);
+            }
+
+            async animateKeyTransfer(sourceEl, destEl, value) {
+                const sourceRect = sourceEl.getBoundingClientRect();
+                const destRect = destEl.getBoundingClientRect();
+                
+                const flyer = document.createElement('div');
+                flyer.className = 'dh-key-flyer';
+                flyer.textContent = value;
+                document.body.appendChild(flyer);
+
+                flyer.style.top = `${sourceRect.top}px`;
+                flyer.style.left = `${sourceRect.left}px`;
+                flyer.style.width = `${sourceRect.width}px`;
+
+                await this.sleep(50); // allow element to be painted
+
+                flyer.style.top = `${destRect.top}px`;
+                flyer.style.left = `${destRect.left}px`;
+                flyer.style.transform = 'scale(0.5)';
+                flyer.style.opacity = '0';
+
+                await this.sleep(this.animationSpeed * 1.5);
+                
+                destEl.textContent = value;
+                document.body.removeChild(flyer);
+            }
+            
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            new DiffieHellmanVisualizer();
+        });
+    </script>
+</VisualizerLayout>
+
+<style is:global>
+    /* Diffie-Hellman specific styles */
+    #dh-visualizer .dh-exchange-container {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        margin-top: 20px;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    #dh-visualizer .dh-party-panel {
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 15px;
+        padding: 20px;
+        width: 45%;
+        min-width: 300px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    #dh-visualizer .dh-party-title {
+        text-align: center;
+        font-size: 1.5em;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+
+    #dh-visualizer .dh-value-box {
+        margin-bottom: 15px;
+    }
+
+    #dh-visualizer .dh-label {
+        font-weight: bold;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+    }
+    
+    #dh-visualizer .dh-value {
+        font-family: 'Courier New', monospace;
+        font-size: 18px;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 5px;
+        min-height: 20px;
+        word-wrap: break-word;
+        transition: all 0.3s ease;
+    }
+
+    #dh-visualizer .dh-value.private {
+        border-left: 4px solid #ff6b6b;
+    }
+    #dh-visualizer .dh-value.public {
+        border-left: 4px solid #48dbfb;
+    }
+    #dh-visualizer .dh-value.shared {
+        border-left: 4px solid #51cf66;
+    }
+
+    #dh-visualizer .dh-value.dh-highlight {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px #ffeb3b;
+    }
+    #dh-visualizer .dh-value.dh-highlight-final {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px #51cf66;
+    }
+
+    #dh-visualizer .text-display.dh-highlight-final {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px #51cf66;
+    }
+
+    #dh-visualizer .dh-validation {
+        font-size: 16px;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        color: #ffeb3b;
+    }
+
+    /* Key transfer animation */
+    .dh-key-flyer {
+        position: absolute;
+        z-index: 100;
+        padding: 10px;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 18px;
+        color: white;
+        transition: all 1.5s cubic-bezier(0.4, 0, 0.6, 1);
+        background: #48dbfb;
+        box-shadow: 0 0 15px #48dbfb;
+        pointer-events: none;
+    }
+
+    /* Responsive design for smaller screens */
+    @media (max-width: 768px) {
+        #dh-visualizer .dh-exchange-container {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        #dh-visualizer .dh-party-panel {
+            width: 90%;
+            min-width: unset;
+        }
+
+        #dh-visualizer .controls {
+            justify-content: center;
+        }
+
+        #dh-visualizer .control-group {
+            min-width: 150px;
+        }
+    }
+</style>

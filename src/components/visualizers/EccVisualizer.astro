@@ -1,0 +1,351 @@
+---
+// src/components/visualizers/EccVisualizer.astro
+import VisualizerLayout from './VisualizerLayout.astro';
+---
+
+<VisualizerLayout title="ECC (secp256r1 / P-256) Visualizer" uniqueId="ecc-visualizer">
+  <div slot="controls" class="control-group">
+    <label for="ecc-message">Message:</label>
+    <input type="text" id="ecc-message" value="Hello ECC" />
+  </div>
+
+  <div slot="actions">
+    <button id="ecc-sign-btn">🔐 Sign</button>
+    <button id="ecc-verify-btn" disabled>🔓 Verify</button>
+  </div>
+
+  <div slot="visualization-panel">
+    <div class="ecc-panel">
+      <div class="ecc-box">
+        <div class="ecc-box-title">1. Key Generation</div>
+        <div class="ecc-value-box">
+          <div class="ecc-value-label">Prime p:</div>
+          <div class="ecc-value" id="ecc-prime-p"></div>
+        </div>
+        <div class="ecc-value-box">
+          <div class="ecc-value-label">Generator g:</div>
+          <div class="ecc-value" id="ecc-generator-g"></div>
+        </div>
+        <div class="ecc-value-box">
+          <div class="ecc-value-label">Private key d:</div>
+          <div class="ecc-value" id="ecc-private-key"></div>
+        </div>
+        <div class="ecc-value-box">
+          <div class="ecc-value-label">Public key Q = d * G:</div>
+          <div class="ecc-value" id="ecc-public-key"></div>
+        </div>
+      </div>
+
+      <div class="ecc-box">
+        <div class="ecc-box-title">2. Signing</div>
+        <div class="ecc-value-box">
+          <div class="ecc-value-label">Ephemeral k:</div>
+          <div class="ecc-value" id="ecc-ephemeral-k"></div>
+        </div>
+        <div class="ecc-value-box">
+          <div class="ecc-value-label">Message hash (SHA-256):</div>
+          <div class="ecc-value" id="ecc-message-hash"></div>
+        </div>
+        <div class="ecc-value-box">
+          <div class="ecc-value-label">Signature (r, s):</div>
+          <div class="ecc-value" id="ecc-signature"></div>
+        </div>
+      </div>
+
+      <div class="ecc-box">
+        <div class="ecc-box-title">3. Verification</div>
+        <div class="ecc-value-box">
+          <div class="ecc-value-label">Verification Result:</div>
+          <div class="ecc-value" id="ecc-verification-result"></div>
+        </div>
+        <div class="ecc-value-box">
+          <div class="ecc-value-label">Final Message:</div>
+          <div class="ecc-value ecc-final" id="ecc-verified-message"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script slot="script">
+    class ECCVisualizer {
+      constructor() {
+        this.msgIn = document.getElementById('ecc-message');
+        this.signBtn = document.getElementById('ecc-sign-btn');
+        this.verifyBtn = document.getElementById('ecc-verify-btn');
+        this.stepInfo = document.querySelector('#ecc-visualizer .step-info');
+
+        this.val = {
+          primeP: document.getElementById('ecc-prime-p'),
+          generatorG: document.getElementById('ecc-generator-g'),
+          privateKey: document.getElementById('ecc-private-key'),
+          publicKey: document.getElementById('ecc-public-key'),
+          ephemeralK: document.getElementById('ecc-ephemeral-k'),
+          messageHash: document.getElementById('ecc-message-hash'),
+          signature: document.getElementById('ecc-signature'),
+          verificationResult: document.getElementById('ecc-verification-result'),
+          verifiedMessage: document.getElementById('ecc-verified-message')
+        };
+
+        this.keys = {};
+        this.setup();
+      }
+
+      setup() {
+        this.signBtn.addEventListener('click', () => this.signMessage());
+        this.verifyBtn.addEventListener('click', () => this.verifySignature());
+      }
+
+      async signMessage() {
+        this.reset();
+        const msg = this.msgIn.value.trim();
+        if (!msg) {
+          this.stepInfo.textContent = 'Please enter a message.';
+          return;
+        }
+
+        this.stepInfo.textContent = 'Generating ECC key pair (P-256)...';
+        this.updateProgress(10);
+        
+        // Display P-256 curve parameters
+        this.val.primeP.textContent = 'P-256 prime field';
+        await this.highlight(this.val.primeP);
+        this.updateProgress(20);
+        
+        this.val.generatorG.textContent = 'P-256 base point G';
+        await this.highlight(this.val.generatorG);
+        this.updateProgress(30);
+
+        const keyPair = await crypto.subtle.generateKey(
+          { name: "ECDSA", namedCurve: "P-256" },
+          true,
+          ["sign", "verify"]
+        );
+
+        this.keys = keyPair;
+        this.updateProgress(40);
+
+        // Display simplified private key info
+        this.val.privateKey.textContent = 'Random 256-bit integer (kept secret)';
+        await this.highlight(this.val.privateKey);
+        this.updateProgress(50);
+
+        const pubJwk = await crypto.subtle.exportKey("jwk", keyPair.publicKey);
+        this.val.publicKey.textContent = `(${pubJwk.x}, ${pubJwk.y})`;
+        await this.highlight(this.val.publicKey);
+        this.updateProgress(60);
+
+        this.stepInfo.textContent = 'Generating ephemeral key...';
+        this.val.ephemeralK.textContent = 'Random nonce (generated per signature)';
+        await this.highlight(this.val.ephemeralK);
+        this.updateProgress(70);
+
+        this.stepInfo.textContent = 'Hashing the message (SHA-256)...';
+        const encoder = new TextEncoder();
+        const data = encoder.encode(msg);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        this.val.messageHash.textContent = hashHex;
+        await this.highlight(this.val.messageHash);
+        this.updateProgress(80);
+
+        this.stepInfo.textContent = 'Signing the message...';
+        const signature = await crypto.subtle.sign(
+          { name: "ECDSA", hash: { name: "SHA-256" } },
+          keyPair.privateKey,
+          data
+        );
+        const sigB64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
+        this.signature = signature;
+        this.message = data;
+
+        this.val.signature.textContent = sigB64;
+        await this.highlight(this.val.signature);
+        this.updateProgress(100);
+
+        this.stepInfo.textContent = 'Signing complete. Ready to verify.';
+        this.verifyBtn.disabled = false;
+      }
+
+      async verifySignature() {
+        this.stepInfo.textContent = 'Verifying signature...';
+        this.updateProgress(20);
+        
+        const valid = await crypto.subtle.verify(
+          { name: "ECDSA", hash: { name: "SHA-256" } },
+          this.keys.publicKey,
+          this.signature,
+          this.message
+        );
+
+        this.updateProgress(60);
+        this.val.verificationResult.textContent = valid ? "✅ Signature Verified!" : "❌ Signature Invalid!";
+        await this.highlight(this.val.verificationResult);
+        this.updateProgress(80);
+
+        if (valid) {
+          const decoded = new TextDecoder().decode(this.message);
+          this.val.verifiedMessage.textContent = `📨 Message Verified! The message is: "${decoded}"`;
+          this.stepInfo.textContent = 'Verification complete.';
+          await this.highlight(this.val.verifiedMessage, true);
+          this.updateProgress(100);
+        } else {
+          this.val.verifiedMessage.textContent = '';
+          this.stepInfo.textContent = 'Verification failed!';
+          this.updateProgress(100);
+        }
+      }
+
+      reset() {
+        Object.values(this.val).forEach(el => el.textContent = '');
+        this.verifyBtn.disabled = true;
+        this.updateProgress(0);
+        document.querySelectorAll('#ecc-visualizer .ecc-value').forEach(el => {
+          el.classList.remove('ecc-final', 'ecc-highlight');
+        });
+      }
+
+      updateProgress(percent) {
+        const progressFill = document.querySelector('#ecc-visualizer .progress-fill');
+        if (progressFill) {
+          progressFill.style.width = `${percent}%`;
+        }
+      }
+
+      async highlight(element, isFinal = false) {
+        element.classList.add('ecc-highlight');
+        await new Promise(res => setTimeout(res, 600));
+        element.classList.remove('ecc-highlight');
+        if (isFinal) element.classList.add('ecc-final');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      new ECCVisualizer();
+    });
+  </script>
+</VisualizerLayout>
+
+<style is:global>
+  /* ECC-specific styles */
+  .visualizer-container .ecc-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .visualizer-container .ecc-box {
+    background: rgba(0, 0, 0, 0.2);
+    flex: 1;
+    min-width: 280px;
+    max-width: 350px;
+    border-radius: 10px;
+    padding: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .visualizer-container .ecc-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .visualizer-container .ecc-box-title {
+    font-weight: bold;
+    font-size: 20px;
+    margin-bottom: 15px;
+    text-align: center;
+    color: #ffeb3b;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    border-bottom: 2px solid rgba(255, 235, 59, 0.3);
+    padding-bottom: 10px;
+  }
+
+  .visualizer-container .ecc-value-box {
+    margin: 15px 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 4px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .visualizer-container .ecc-value-box:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-left-color: #667eea;
+  }
+
+  .visualizer-container .ecc-value-label {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #e3f2fd;
+  }
+
+  .visualizer-container .ecc-value {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    word-break: break-word;
+    min-height: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.5s ease;
+    line-height: 1.4;
+  }
+
+  .visualizer-container .ecc-value:empty::before {
+    content: "Waiting...";
+    opacity: 0.5;
+    font-style: italic;
+  }
+
+  .visualizer-container .ecc-highlight {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 235, 59, 0.6);
+    background: rgba(255, 235, 59, 0.2);
+    border-color: #ffeb3b;
+  }
+
+  .visualizer-container .ecc-final {
+    border: 2px solid #51cf66;
+    box-shadow: 0 0 15px rgba(81, 207, 102, 0.5);
+    background: rgba(81, 207, 102, 0.1);
+  }
+
+  .visualizer-container .ecc-final::before {
+    content: "🎉 ";
+  }
+
+  /* Responsive design for smaller screens */
+  @media (max-width: 768px) {
+    .visualizer-container .ecc-panel {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .visualizer-container .ecc-box {
+      min-width: 100%;
+      max-width: 100%;
+    }
+    
+    .visualizer-container .ecc-value {
+      font-size: 12px;
+    }
+  }
+
+  /* Animation keyframes */
+  @keyframes eccPulse {
+    0% { box-shadow: 0 0 5px rgba(255, 235, 59, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(255, 235, 59, 0.8); }
+    100% { box-shadow: 0 0 5px rgba(255, 235, 59, 0.3); }
+  }
+
+  .visualizer-container .ecc-highlight {
+    animation: eccPulse 0.6s ease-in-out;
+  }
+</style>

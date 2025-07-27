@@ -17,6 +17,8 @@ import SignalVisualizer from '../../components/visualizers/SignalVisualizer.astr
 import TlsVisualizer from '../../components/visualizers/TlsVisualizer.astro';
 import EdDSAVisualizer from '../../components/visualizers/EdDSAVisualizer.astro';
 import ElGamalVisualizer from '../../components/visualizers/ElGamalVisualizer.astro';
+import EccVisualizer from '../../components/visualizers/EccVisualizer.astro';
+import DhVisualizer from '../../components/visualizers/DhVisualizer.astro';
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection('blog');
@@ -223,6 +225,24 @@ const socialImageUrl = socialImage || (cover ? cover.src : undefined) || '/image
         Interactive El Gamal Visualizer
       </h2>
       <ElGamalVisualizer />
+    </div>
+  )}
+  
+                           {entry.data.visualizer === 'EccVisualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive Ecc Visualizer
+      </h2>
+      <EccVisualizer />
+    </div>
+  )}
+
+                             {entry.data.visualizer === 'DhVisualizer' && (
+    <div class="visualizer-section mb-12 pb-8 border-b-2 border-gray-300 dark:border-gray-700 border-dashed">
+      <h2 class="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+        Interactive Diffie-Hellman Key Exchange Visualizer
+      </h2>
+      <DhVisualizer />
     </div>
   )}
 
